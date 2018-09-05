@@ -8,4 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="buttonStyle" parent="@android:style/Widget.Button">
+        <item name="android:textColor">@color/backgroundColorLight</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:padding">20dp</item>
+        <item name="android:background">@color/backgroundColorDark</item>
+    </style>
+    
 </resources>

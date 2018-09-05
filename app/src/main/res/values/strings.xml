@@ -3,5 +3,10 @@
 
     <string name="button_new">Uusi peli</string>
     <string name="button_join">Liity peliin</string>
-
+    <string name="battleship">Battleship</string>
+    <string name="cruiser">Cruiser</string>
+    <string name="destroyer">Destroyer</string>
+    <string name="shiplayout">Ship Layout:</string>
+    <string name="horizontal">Horizontal</string>
+    <string name="vertical">Vertical</string>
 </resources>
