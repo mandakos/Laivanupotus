@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="header_fontsize">50dp</dimen>
+
+    <dimen name="big_button_fontsize">20dp</dimen>
+    <dimen name="small_button_fontsize">10dp</dimen>
+    <dimen name="big_button_padding">20dp</dimen>
+
+</resources>

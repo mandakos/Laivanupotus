@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Laivanupotus</string>
+
+    <string name="button_new">Uusi peli</string>
+    <string name="button_join">Liity peliin</string>
+
+</resources>
