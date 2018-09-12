@@ -8,23 +8,41 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class BluetoothActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
-    private static final String TAG = "Bluetooth Activity";
+    private static final String TAG = "BluetoothActivity";
+    private static final UUID UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     BluetoothAdapter mBluetoothAdapter;
+    BluetoothConnectionService mBluetoothConnection;
+    BluetoothDevice mBTDevice;
+
+    Button btnEnableDisable_Discoverable;
+    Button btnStartConnection;
+    Button btnSend;
+    EditText etSend;
+    ListView lvNewDevices;
+    TextView incomingMessages;
+
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
-    ListView lvNewDevices;
+    StringBuilder messages;
+
+    Context mContext;
 
     /*
         BroadcastReceiver Bluetoothin päälle/pois laittamiselle
@@ -118,6 +136,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
                 //Laite on jo paritettu
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_BONDED");
+                    mBTDevice = mDevice;
                 }
                 //Paritus käynnissä
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
@@ -131,15 +150,33 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         }
     };
 
+    // Täällä käsitellään saapuvia viestejä
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String text = intent.getStringExtra("MESSAGE");
+            messages.append(text + "\n");
+            incomingMessages.setText(messages);
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bt);
-        Button btnONOFF = (Button) findViewById(R.id.btnONOFF);
-        Button btnEnableDisable_Discoverable = (Button) findViewById(R.id.btnDiscoverable_on_off);
-        lvNewDevices = (ListView) findViewById(R.id.lvNewDevices);
+        Button btnONOFF = findViewById(R.id.btnONOFF);
+        btnEnableDisable_Discoverable = findViewById(R.id.btnDiscoverable_on_off);
+        btnStartConnection = findViewById(R.id.btnStartConnection);
+        btnSend = findViewById(R.id.btnSend);
+        etSend = findViewById(R.id.editText);
+        lvNewDevices = findViewById(R.id.lvNewDevices);
+        incomingMessages = findViewById(R.id.incomingMessage);
+
         mBTDevices = new ArrayList<>();
+        messages = new StringBuilder();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("incomingMessage"));
 
         //Kutsutaan kun paritus tapahtuu
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -156,6 +193,35 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
                 enableDisableBT();
             }
         });
+        btnStartConnection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startConnection();
+            }
+        });
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
+                mBluetoothConnection.write(bytes);
+                etSend.setText("");
+            }
+        });
+    }
+
+    //Metodit yhteyden luomiselle.
+    //Sovellus kaatuu jos paritusta ei ole tehty ensin
+
+    public void startConnection(){
+        startBTConnection(mBTDevice, UUID_INSECURE);
+    }
+
+
+
+    public void startBTConnection(BluetoothDevice device, UUID uuid){
+        Log.d(TAG, "startBTConnection : Initializing RFCOM Bluetooth Connection");
+
+        mBluetoothConnection.startClient(device, uuid);
     }
 
     @Override
@@ -237,6 +303,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
             }else{
                 Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
             }
+
         }
     }
 
@@ -255,8 +322,11 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         //paritus
         //createBond()-metodi vaatii suuremman Android SDK version entä JELLY_BEAN_MR2
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2){
+            //Tallennetaan listalta valittu BT-laite laitteeksi, jonka kanssa kommunikoidaan ja avataan kommunikointiyhteys
             Log.d(TAG, "Trying to pair with " + deviceName);
             mBTDevices.get(position).createBond();
+            mBTDevice = mBTDevices.get(position);
+            mBluetoothConnection = new BluetoothConnectionService(BluetoothActivity.this);
         }
     }
 }

@@ -35,7 +35,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ShipSettingActivity"></activity>
-        <activity android:name=".BluetoothActivity" />
+        <activity android:name=".BluetoothActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

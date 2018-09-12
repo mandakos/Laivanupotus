@@ -1,4 +1,4 @@
-﻿package ryhma3.laivanupotus;
+package ryhma3.laivanupotus;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -33,6 +35,7 @@ public class BluetoothConnectionService {
     public BluetoothConnectionService(Context c){
         mContext = c;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        start();
     }
 
     /*
@@ -71,7 +74,6 @@ public class BluetoothConnectionService {
                 Log.e(TAG, "Run thread : IOException" + e.getMessage());
             }
 
-            //TODO: Implement connect()-method
             if(socket != null){
                 connected(socket, mDevice);
             }
@@ -188,7 +190,11 @@ public class BluetoothConnectionService {
             OutputStream tmpOut = null;
 
             //Edistysdialogi suljetaan kun yhteys on valmis
-            mProgressDialog.dismiss();
+            try{
+                mProgressDialog.dismiss();
+            }catch(NullPointerException e){
+                Log.e(TAG, "Null Pointer exception in ConnectedThread" + e.getMessage());
+            }
 
             try{
                 tmpIn = mSocket.getInputStream();
@@ -211,6 +217,12 @@ public class BluetoothConnectionService {
                     bytes = inStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);
+
+                    //Tällä lähetetään kamaa
+                    Intent incomingMessageIntent = new Intent("incomingMessage");
+                    incomingMessageIntent.putExtra("MESSAGE", incomingMessage);
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(incomingMessageIntent);
+
                 } catch (IOException e) {
                     Log.e(TAG, "read: Error reading from inputstream. " + e.getMessage());
                     break;
