@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,9 +13,11 @@
     <LinearLayout
         android:id="@+id/linearLayoutPlacement"
         android:layout_width="wrap_content"
-        android:layout_height="175dp"
-        android:layout_marginStart="4dp"
+        android:layout_height="288dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="2dp"
         android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -57,34 +59,18 @@
             android:checked="true"
             android:text="@string/horizontal" />
 
-    </LinearLayout>
-
-    <!--
-        Alla olevat nappulat ovat suunnittelun apuna, määrä ja funktio saattavat muuttua
-    -->
-
-    <LinearLayout
-        android:layout_width="90dp"
-        android:layout_height="235dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayoutPlacement">
-
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/readyButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Button" />
+            android:text="Ready!" />
 
         <Button
-            android:id="@+id/button4"
+            android:id="@+id/fireButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Button" />
+            android:text="Fire!" />
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
