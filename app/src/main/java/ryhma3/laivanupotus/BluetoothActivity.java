@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -18,10 +19,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.UUID;
+
+import static ryhma3.laivanupotus.MainActivity.REQUEST_ENABLE_BT;
 
 public class BluetoothActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     private static final String TAG = "BluetoothActivity";
@@ -31,6 +35,8 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     BluetoothConnectionService mBluetoothConnection;
     BluetoothDevice mBTDevice;
 
+    Button btnServer;
+    Button btnClient;
     Button btnEnableDisable_Discoverable;
     Button btnStartConnection;
     Button btnSend;
@@ -161,16 +167,32 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     };
 
 
+    private void checkBluetooth() {
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            Log.d(TAG, "Bluetooth on");
+        }
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bt);
-        Button btnONOFF = findViewById(R.id.btnONOFF);
-        btnEnableDisable_Discoverable = findViewById(R.id.btnDiscoverable_on_off);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); //set orientation to landscape
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        //Button btnONOFF = findViewById(R.id.btnONOFF);
+        //btnEnableDisable_Discoverable = findViewById(R.id.btnDiscoverable_on_off);
         btnStartConnection = findViewById(R.id.btnStartConnection);
+
+        btnClient = findViewById(R.id.btnClient);
+        btnServer = findViewById(R.id.btnServer);
+        lvNewDevices = findViewById(R.id.lvNewDevices);
+
         btnSend = findViewById(R.id.btnSend);
         etSend = findViewById(R.id.editText);
-        lvNewDevices = findViewById(R.id.lvNewDevices);
         incomingMessages = findViewById(R.id.incomingMessage);
 
         mBTDevices = new ArrayList<>();
@@ -185,20 +207,47 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         lvNewDevices.setOnItemClickListener(BluetoothActivity.this);
-        btnONOFF.setOnClickListener(new View.OnClickListener(){
+
+        btnServer.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: server");
+                checkBluetooth();
+                //startServer(v);
+                // TODO: Serverille ja clientille omat funktiot?
+                // Alempana koodissa kommentoituna BT_TTT:stä otettu esimerkki
+            }
+        });
+
+        btnClient.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: client");
+                checkBluetooth();
+                btnDiscover(v);
+                //startClient(v);
+            }
+        });
+
+
+        /*btnONOFF.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: enabling/disabling bluetooth");
                 enableDisableBT();
             }
-        });
+        });*/
+
         btnStartConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startConnection();
             }
         });
+
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -209,14 +258,63 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         });
     }
 
+        /*  SERVER / CLIENT FUNKTIOT?
+
+        protected void startServer(View v){
+        Button serverB=findViewById(R.id.btnServer);
+        if (serverB.getText().toString().equals("Server")){
+
+            // Start server
+            t = new AcceptThread();
+            t.start();
+            // Notify that server was started.
+            serverB.setText("Stop");
+            text.setText("Status: Server Active");
+
+        }else{
+            // Stop server if something goes wrong
+            if (t!=null) {
+
+                t.cancel();
+                t.interrupt();
+                t=null;
+            }
+            // Display Server text when server is stopped.
+            serverB.setText("Server");
+            text.setText("Status: -");
+        }
+
+    }
+
+    protected void startClient(View v){
+        Button clientB=findViewById(R.id.btnClient);
+        String deviceMacAddress;
+
+        if (mBTDevice!=null && clientB.getText().toString().equals("Client")) {
+            String[] s = mBTDevice.split("\n");
+            deviceMacAddress = s[1];
+
+            mBluetoothAdapter.cancelDiscovery();
+            // Start connection
+            BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceMacAddress);
+            new ConnectingThread(device).start();
+            // Notify that client mode was selected.
+            text.setText("Status: Client selected");
+            clientB.setText("Stop");
+        }
+        else {
+            text.setText("Status:- ");
+            clientB.setText("Client");
+        }
+
+    } */
+
     //Metodit yhteyden luomiselle.
     //Sovellus kaatuu jos paritusta ei ole tehty ensin
 
     public void startConnection(){
         startBTConnection(mBTDevice, UUID_INSECURE);
     }
-
-
 
     public void startBTConnection(BluetoothDevice device, UUID uuid){
         Log.d(TAG, "startBTConnection : Initializing RFCOM Bluetooth Connection");
