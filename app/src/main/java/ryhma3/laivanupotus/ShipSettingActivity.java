@@ -14,12 +14,12 @@ public class ShipSettingActivity extends AppCompatActivity {
     final String TAG = "ShipSettingActivity";
 
     /*
-    TODO: Kaikki ohjelmalogiikka ":D"
     Note to self:
     toteuta tässä käyttöliittymäkomponenttien logiikka ja mahdollinen BT-toiminnallisuus,
     mutta kokeile piirtää ruudukko Viewin avulla
      */
 
+    ShipView shipView;
     ToggleButton toggleBtn;
     RadioGroup ships;
     Button readyButton;
@@ -31,6 +31,8 @@ public class ShipSettingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ship_setting);
+        //TODO: Viewi XML:n
+        //shipView = findViewById(R.id.)
 
         toggleBtn = findViewById(R.id.toggleButton);
         toggleBtn.setText(getString(R.string.horizontal));
