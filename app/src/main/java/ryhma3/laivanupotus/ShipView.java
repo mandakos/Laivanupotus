@@ -37,21 +37,16 @@ public class ShipView extends View implements Runnable {
     float screenWidth = 0.0f;
     float screenHeight = 0.0f;
 
-    //Laitteen näytön pikselitiheys
-    float screenWidthDpi = 0.0f;
-    float screenHeightDpi = 0.0f;
-
     //Käyttöliittymän mitat
     float layoutWidth;
-    float layoutHeight;
-
-    //Käyttöliittymän viemä tila + tyhjään tilaan varattu korkeus & leveys
-    float reservedSpaceX = 0.0f;
-    float reservedSpaceY = 0.0f;
 
     // todellinen ruudukoille käytössä oleva tila
     float availableWidth = 0.0f;
     float availableHeight = 0.0f;
+
+    //Ruudukon ja yhden ruudun sivujen pituudet
+    float gridSideLength = 0.0f;
+    float cellSideLength = 0.0f;
 
     //Muuttujat, joilla selvitetään laitteen näytön speksit
     WindowManager wm;
@@ -67,8 +62,9 @@ public class ShipView extends View implements Runnable {
     boolean shipsBeingSet = true; //true = laivojenasettelutila, false = taistelutila. Näkymä alkaa oletuksena asettelutilassa
     boolean myTurn = false; //Oletuksena kummankaan pelaajan vuoro ei ole vielä. Pelaaja voi ampua vain kun on hänen vuoronsa
 
-    public ShipView(Context context) {
+    public ShipView(Context context, float layoutWidth) {
         super(context);
+        this.layoutWidth = layoutWidth;
     }
 
     public ShipView(Context context, @Nullable AttributeSet attrs) {
@@ -91,17 +87,22 @@ public class ShipView extends View implements Runnable {
         display.getSize(size);
         //HUOM! Näkymä on horisontaalinen, mutta sizeen tallennetaan sivujen pituuden kuin puhelin olisi pystyasennossa
         screenWidth = size.y;
+        System.out.println("Screen Width: " + screenWidth);
         screenHeight = size.x;
+        System.out.println("Screen Height: " + screenHeight);
         metrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(metrics);
-        //Alla olevien avulla voidaan laskea helposti käyttöliittymän viemä tila prosentuaalisesti.
-        //TODO: Järkevä tapa laskea käyttöliittymän mitat & käyttöliittymäsuunnittelu
-        
-        screenWidthDpi = metrics.ydpi;
-        screenHeightDpi = metrics.xdpi;
 
-        layoutWidth = findViewById(R.id.linearLayoutPlacement).getWidth();
-        layoutHeight = findViewById(R.id.linearLayoutPlacement).getWidth();
+        availableWidth = (float) (screenWidth - (2.5 * layoutWidth));
+        System.out.println("Layout Width: " + layoutWidth);
+        System.out.println("Available Width: " + availableWidth);
+        gridSideLength = availableWidth / 2; // Ruudukkoja on kaksi eli vapaa leveys tulee jakaa niiden kesken
+        System.out.println("Grid side length: " + gridSideLength);
+        cellSideLength = gridSideLength / CELLS;
+        System.out.println("Cell side length: " + cellSideLength);
+
+        myGrid = new int[CELLS][CELLS];
+        enemyGrid = new int[CELLS][CELLS];
     }
 
     @Override
@@ -112,7 +113,13 @@ public class ShipView extends View implements Runnable {
     @Override
     protected void onDraw(Canvas canvas) {
         //TODO: Ruudukon piirtämisen logiikka
-        super.onDraw(canvas);
+        for(int i = 0; i < CELLS; i++) {
+            float yPlacement = (float) ((i + 1) + (layoutWidth * 1.5));
+            for(int j = 0; j < CELLS; j++){
+                float xPlacement = (float) ((j + 1) + (layoutWidth * 0.5));
+                canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
+            }
+        }
     }
 
     @Override

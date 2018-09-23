@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ToggleButton;
@@ -25,15 +26,14 @@ public class ShipSettingActivity extends AppCompatActivity {
     Button readyButton;
     Button fireButton;
     Ship battleship, cruiser, destroyer;
+    LinearLayout controls;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ship_setting);
-        //TODO: Viewi XML:n
-        //shipView = findViewById(R.id.)
-
+        controls = findViewById(R.id.linearLayoutPlacement);
         toggleBtn = findViewById(R.id.toggleButton);
         toggleBtn.setText(getString(R.string.horizontal));
         toggleBtn.setTextOn(getString(R.string.horizontal));
@@ -90,5 +90,11 @@ public class ShipSettingActivity extends AppCompatActivity {
                 //TODO: Ampumisen ohjelmalogiikka
             }
         });
+        shipView = new ShipView(this, getLayoutWidth());
     }
+
+    public float getLayoutWidth(){
+        return controls.getWidth();
+    }
+
 }
