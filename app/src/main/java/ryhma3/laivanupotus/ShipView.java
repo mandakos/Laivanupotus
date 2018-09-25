@@ -62,9 +62,8 @@ public class ShipView extends View implements Runnable {
     boolean shipsBeingSet = true; //true = laivojenasettelutila, false = taistelutila. Näkymä alkaa oletuksena asettelutilassa
     boolean myTurn = false; //Oletuksena kummankaan pelaajan vuoro ei ole vielä. Pelaaja voi ampua vain kun on hänen vuoronsa
 
-    public ShipView(Context context, float layoutWidth) {
+    public ShipView(Context context) {
         super(context);
-        this.layoutWidth = layoutWidth;
     }
 
     public ShipView(Context context, @Nullable AttributeSet attrs) {
@@ -80,7 +79,7 @@ public class ShipView extends View implements Runnable {
         hitPaint.setColor(Color.RED);
         missPaint.setColor(Color.LTGRAY);
 
-        // Tilan laskentaan tarvittavat loitsut
+        // Tilan laskentaan tarvittavat loitsut. Vaatii kovaa refaktorointia, valtaosa tällä hetkellä turhaa
         wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         display = wm.getDefaultDisplay();
         size = new Point();
@@ -103,6 +102,8 @@ public class ShipView extends View implements Runnable {
 
         myGrid = new int[CELLS][CELLS];
         enemyGrid = new int[CELLS][CELLS];
+        System.out.println("The width of this view is: " + this.getWidth());
+        System.out.println("The height of this view is: " + this.getHeight());
     }
 
     @Override
@@ -114,9 +115,9 @@ public class ShipView extends View implements Runnable {
     protected void onDraw(Canvas canvas) {
         //TODO: Ruudukon piirtämisen logiikka
         for(int i = 0; i < CELLS; i++) {
-            float yPlacement = (float) ((i + 1) + (layoutWidth * 1.5));
+            float yPlacement = (float) ((i + 1) * (cellSideLength));
             for(int j = 0; j < CELLS; j++){
-                float xPlacement = (float) ((j + 1) + (layoutWidth * 0.5));
+                float xPlacement = (float) ((j + 1) * (cellSideLength));
                 canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
             }
         }
@@ -125,6 +126,7 @@ public class ShipView extends View implements Runnable {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //TODO: Kosketustapahtumien logiikka
-        return super.onTouchEvent(event);
+        System.out.println(event.getX() + "," + event.getY());
+        return true;
     }
 }

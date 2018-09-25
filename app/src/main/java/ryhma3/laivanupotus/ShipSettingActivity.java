@@ -22,7 +22,7 @@ public class ShipSettingActivity extends AppCompatActivity {
 
     ShipView shipView;
     ToggleButton toggleBtn;
-    RadioGroup ships;
+    RadioGroup shipsRadioGroup;
     Button readyButton;
     Button fireButton;
     Ship battleship, cruiser, destroyer;
@@ -38,8 +38,8 @@ public class ShipSettingActivity extends AppCompatActivity {
         toggleBtn.setText(getString(R.string.horizontal));
         toggleBtn.setTextOn(getString(R.string.horizontal));
         toggleBtn.setTextOff(getString(R.string.vertical));
-
-        ships = findViewById(R.id.radioShips);
+        shipsRadioGroup = findViewById(R.id.radioShips);
+        shipView = findViewById(R.id.ship_view);
 
         readyButton = findViewById(R.id.readyButton);
         readyButton.setOnClickListener(new Button.OnClickListener(){
@@ -50,9 +50,9 @@ public class ShipSettingActivity extends AppCompatActivity {
                 //Siirrä tämä logiikka Viewiin
                 int x = 0, y = 0;
                 String orientation = toggleBtn.getText().toString();
-                int radioButtonID = ships.getCheckedRadioButtonId();
+                int radioButtonID = shipsRadioGroup.getCheckedRadioButtonId();
                 RadioButton radioButton = findViewById(radioButtonID);
-                int radioIndex = ships.indexOfChild(radioButton);
+                int radioIndex = shipsRadioGroup.indexOfChild(radioButton);
                 Log.d(TAG, "You tried to create a " + radioButton.getText() + " with " + orientation + " orientation.");
                 Log.d(TAG, "radioButtonIndex is " + radioIndex);
                 switch(radioIndex){
@@ -90,7 +90,6 @@ public class ShipSettingActivity extends AppCompatActivity {
                 //TODO: Ampumisen ohjelmalogiikka
             }
         });
-        shipView = new ShipView(this, getLayoutWidth());
     }
 
     public float getLayoutWidth(){
