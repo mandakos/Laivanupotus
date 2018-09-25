@@ -31,16 +31,23 @@ public class ShipView extends View implements Runnable {
     Paint hitPaint = new Paint(); //ruutu, johon on ammuttu ja osuttu
     Paint missPaint = new Paint(); //Ruutu, johon on ammuttu mutta laukaus ei ole osunut
 
-    //Muuttujat joilla lasketaan mihin ruudukot piirretään ja kuinka isoja ne ovat
 
+    //Muuttujat joilla lasketaan mihin ruudukot piirretään ja kuinka isoja ne ovat
+    /*
     //Laitteen näytön korkeus ja leveys
     float screenWidth = 0.0f;
     float screenHeight = 0.0f;
+    */
 
-    //Käyttöliittymän mitat
-    float layoutWidth;
+    // Tämän näkymän mitat
+    float viewWidth = 0.0f;
+    float viewHeight = 0.0f;
 
-    // todellinen ruudukoille käytössä oleva tila
+    //Marginaaleille ja tyhjälle tilalle varatut mitat
+    float emptySpaceWidth = 0.0f;
+    float emptySpaceHeight = 0.0f;
+
+    // todellinen ruudukoille käytössä oleva tila (vähennetään näkymän mitoista tyhjä tila ja marginaalit
     float availableWidth = 0.0f;
     float availableHeight = 0.0f;
 
@@ -49,10 +56,12 @@ public class ShipView extends View implements Runnable {
     float cellSideLength = 0.0f;
 
     //Muuttujat, joilla selvitetään laitteen näytön speksit
+    /*
     WindowManager wm;
     Display display;
     Point size;
     DisplayMetrics metrics;
+    */
 
     //Matriisit omille ja vihollisen laivoille
     int[][] myGrid;
@@ -79,7 +88,9 @@ public class ShipView extends View implements Runnable {
         hitPaint.setColor(Color.RED);
         missPaint.setColor(Color.LTGRAY);
 
-        // Tilan laskentaan tarvittavat loitsut. Vaatii kovaa refaktorointia, valtaosa tällä hetkellä turhaa
+        // Legacy-versio ruudukon piirtämiseen tarvittavasta tilan laskennasta.
+        // Tähän versioon voidaan joutua palaamaan jos ruudukot piirtyvätkin väärin joillakin laitteilla.
+        /*
         wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         display = wm.getDefaultDisplay();
         size = new Point();
@@ -93,17 +104,26 @@ public class ShipView extends View implements Runnable {
         wm.getDefaultDisplay().getMetrics(metrics);
 
         availableWidth = (float) (screenWidth - (2.5 * layoutWidth));
-        System.out.println("Layout Width: " + layoutWidth);
-        System.out.println("Available Width: " + availableWidth);
         gridSideLength = availableWidth / 2; // Ruudukkoja on kaksi eli vapaa leveys tulee jakaa niiden kesken
         System.out.println("Grid side length: " + gridSideLength);
         cellSideLength = gridSideLength / CELLS;
         System.out.println("Cell side length: " + cellSideLength);
+        */
+
+        viewWidth = this.getWidth();
+        viewHeight = this.getHeight();
+
+        emptySpaceWidth = viewWidth * 0.3f; //marginaali reunojen ja ruudukkojen väillä, tyhjä tila yhteensä siis esim. 30% koko leveydestä
+        emptySpaceHeight = viewHeight * 0.0f; //Muuta tämäkin sopivaksi, 0.0f placeholderina
+
+        availableWidth = viewWidth - emptySpaceWidth;
+        availableHeight = viewHeight - emptySpaceHeight;
+
+        gridSideLength = availableWidth / 2;
+        cellSideLength = gridSideLength / 10;
 
         myGrid = new int[CELLS][CELLS];
         enemyGrid = new int[CELLS][CELLS];
-        System.out.println("The width of this view is: " + this.getWidth());
-        System.out.println("The height of this view is: " + this.getHeight());
     }
 
     @Override
