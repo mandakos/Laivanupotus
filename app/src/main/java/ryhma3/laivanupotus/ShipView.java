@@ -114,7 +114,7 @@ public class ShipView extends View implements Runnable {
         viewHeight = this.getHeight();
 
         emptySpaceWidth = viewWidth * 0.3f; //marginaali reunojen ja ruudukkojen väillä, tyhjä tila yhteensä siis esim. 30% koko leveydestä
-        emptySpaceHeight = viewHeight * 0.0f; //Muuta tämäkin sopivaksi, 0.0f placeholderina
+        emptySpaceHeight = viewHeight * 0.1f; //Muuta tämäkin sopivaksi
 
         availableWidth = viewWidth - emptySpaceWidth;
         availableHeight = viewHeight - emptySpaceHeight;
@@ -133,11 +133,19 @@ public class ShipView extends View implements Runnable {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        //TODO: Ruudukon piirtämisen logiikka
+        //Oma ruudukko
         for(int i = 0; i < CELLS; i++) {
-            float yPlacement = (float) ((i + 1) * (cellSideLength));
+            float yPlacement = emptySpaceHeight + ((i + 1) * (cellSideLength));
             for(int j = 0; j < CELLS; j++){
-                float xPlacement = (float) ((j + 1) * (cellSideLength));
+                float xPlacement = ((j + 1) * (cellSideLength));
+                canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
+            }
+        }
+        //vihollisen ruudukko
+        for(int i = 0; i < CELLS; i++) {
+            float yPlacement = emptySpaceHeight + ((i + 1) * (cellSideLength));
+            for (int j = 0; j < CELLS; j++) {
+                float xPlacement = (gridSideLength + viewWidth * 0.2f) + (j + 1) * (cellSideLength);
                 canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
             }
         }
