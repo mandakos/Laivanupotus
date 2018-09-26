@@ -4,14 +4,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 
 public class ShipView extends View implements Runnable {
 
@@ -43,9 +39,9 @@ public class ShipView extends View implements Runnable {
     float viewWidth = 0.0f;
     float viewHeight = 0.0f;
 
-    //Marginaaleille ja tyhjälle tilalle varatut mitat
-    float emptySpaceWidth = 0.0f;
-    float emptySpaceHeight = 0.0f;
+    //Marginaalien leveys ja korkeus
+    float marginWidth = 0.0f;
+    float marginHeight = 0.0f;
 
     // todellinen ruudukoille käytössä oleva tila (vähennetään näkymän mitoista tyhjä tila ja marginaalit
     float availableWidth = 0.0f;
@@ -113,14 +109,16 @@ public class ShipView extends View implements Runnable {
         viewWidth = this.getWidth();
         viewHeight = this.getHeight();
 
-        emptySpaceWidth = viewWidth * 0.3f; //marginaali reunojen ja ruudukkojen väillä, tyhjä tila yhteensä siis esim. 30% koko leveydestä
-        emptySpaceHeight = viewHeight * 0.1f; //Muuta tämäkin sopivaksi
+        marginWidth = viewWidth * 0.05f; //marginaali on 5% koko näkymän leveydestä.
+        marginHeight = viewHeight * 0.10f; //marginaali 10% näkymän korkeudesta
 
-        availableWidth = viewWidth - emptySpaceWidth;
-        availableHeight = viewHeight - emptySpaceHeight;
+        availableWidth = viewWidth - 3 * marginWidth; // <-[]<->[]-> ruudukot näyttävät suunnilleen tältä, marginaaleja siis 3
+        availableHeight = viewHeight - 2 * marginHeight; // marginaalit tulevat ruudukkojen ylä- ja alapuolelle
 
         gridSideLength = availableWidth / 2;
+        System.out.println("Grid side length: " + gridSideLength);
         cellSideLength = gridSideLength / 10;
+        System.out.println("Cell side length: " + cellSideLength);
 
         myGrid = new int[CELLS][CELLS];
         enemyGrid = new int[CELLS][CELLS];
@@ -135,7 +133,7 @@ public class ShipView extends View implements Runnable {
     protected void onDraw(Canvas canvas) {
         //Oma ruudukko
         for(int i = 0; i < CELLS; i++) {
-            float yPlacement = emptySpaceHeight + ((i + 1) * (cellSideLength));
+            float yPlacement = marginHeight + ((i + 1) * (cellSideLength));
             for(int j = 0; j < CELLS; j++){
                 float xPlacement = ((j + 1) * (cellSideLength));
                 canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
@@ -143,9 +141,9 @@ public class ShipView extends View implements Runnable {
         }
         //vihollisen ruudukko
         for(int i = 0; i < CELLS; i++) {
-            float yPlacement = emptySpaceHeight + ((i + 1) * (cellSideLength));
+            float yPlacement = marginHeight + ((i + 1) * (cellSideLength));
             for (int j = 0; j < CELLS; j++) {
-                float xPlacement = (gridSideLength + viewWidth * 0.2f) + (j + 1) * (cellSideLength);
+                float xPlacement = (gridSideLength + marginWidth * 2) + (j + 1) * (cellSideLength);
                 canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
             }
         }
@@ -154,7 +152,14 @@ public class ShipView extends View implements Runnable {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //TODO: Kosketustapahtumien logiikka
-        System.out.println(event.getX() + "," + event.getY());
+        if(shipsBeingSet){
+            if(event.getAction() == MotionEvent.ACTION_DOWN){
+                System.out.println(event.getX() + "," + event.getY());
+                double x = event.getX();
+                double y = event.getY();
+            }
+        }
+
         return true;
     }
 }
