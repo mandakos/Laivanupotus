@@ -22,10 +22,12 @@ public class ShipView extends View implements Runnable {
 
     final int CELLS = 10; //Ruutuja ruudukon yhdellä sivulla. Ruudukko on siis 10x10 ruutua
 
+    //Ruudukon piirtämiseen tarvittavat värit
     Paint gridPaint = new Paint(); //Tyhjä ruutu
     Paint shipPaint = new Paint(); //ruutu, jossa on laiva
     Paint hitPaint = new Paint(); //ruutu, johon on ammuttu ja osuttu
     Paint missPaint = new Paint(); //Ruutu, johon on ammuttu mutta laukaus ei ole osunut
+    Paint targetPaint = new Paint(); //Ruutu, jonka päällä tähtäin on
 
 
     //Muuttujat joilla lasketaan mihin ruudukot piirretään ja kuinka isoja ne ovat
@@ -63,6 +65,10 @@ public class ShipView extends View implements Runnable {
     int[][] myGrid;
     int[][] enemyGrid;
 
+    //Tähtäimen koordinaatit. Tähtäin piirtyy vakiona ruutuun 0,0 vihollisen ruudukossa
+    int targetingX;
+    int targetingY;
+
     //Boolean-muuttujat, joilla tutkitaan onko näkymä tietyssä tilassa
     boolean shipsBeingSet = true; //true = laivojenasettelutila, false = taistelutila. Näkymä alkaa oletuksena asettelutilassa
     boolean myTurn = false; //Oletuksena kummankaan pelaajan vuoro ei ole vielä. Pelaaja voi ampua vain kun on hänen vuoronsa
@@ -81,8 +87,11 @@ public class ShipView extends View implements Runnable {
         gridPaint.setStyle(Paint.Style.STROKE); //Piirtää oletuksena valkoisia ruutuja mustalla reunuksella
         shipPaint.setStyle(Paint.Style.FILL_AND_STROKE); //Piirtää oletuksena täysin mustia ruutuja
         hitPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        missPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        targetPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         hitPaint.setColor(Color.RED);
         missPaint.setColor(Color.LTGRAY);
+        targetPaint.setColor(Color.GREEN);
 
         // Legacy-versio ruudukon piirtämiseen tarvittavasta tilan laskennasta.
         // Tähän versioon voidaan joutua palaamaan jos ruudukot piirtyvätkin väärin joillakin laitteilla.
@@ -135,8 +144,13 @@ public class ShipView extends View implements Runnable {
         for(int i = 0; i < CELLS; i++) {
             float yPlacement = marginHeight + ((i + 1) * (cellSideLength));
             for(int j = 0; j < CELLS; j++){
+
                 float xPlacement = ((j + 1) * (cellSideLength));
-                canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
+                if(myGrid[j][i] == SHIP){
+                    canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, shipPaint);
+                }else{
+                    canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
+                }
             }
         }
         //vihollisen ruudukko
@@ -144,22 +158,54 @@ public class ShipView extends View implements Runnable {
             float yPlacement = marginHeight + ((i + 1) * (cellSideLength));
             for (int j = 0; j < CELLS; j++) {
                 float xPlacement = (gridSideLength + marginWidth * 2) + (j + 1) * (cellSideLength);
-                canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
+                if(j == targetingX && i == targetingY){
+                    canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, targetPaint);
+                }else{
+                    canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
+                }
             }
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        //TODO: Kosketustapahtumien logiikka
+        /*
+            Jos ollaan laivojenasettelutilassa, haetaan painallustapahtuman koordinaatit
+            ja tunnettujen mittojen avulla lasketaan mihin ruutuun laivaa yritetään asettaa
+         */
         if(shipsBeingSet){
             if(event.getAction() == MotionEvent.ACTION_DOWN){
-                System.out.println(event.getX() + "," + event.getY());
-                double x = event.getX();
-                double y = event.getY();
+                if(event.getX() < (marginWidth + gridSideLength)) {
+                    try {
+                        int x = (int) ((event.getX() - marginWidth) / cellSideLength);
+                        int y = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
+                        myGrid[x][y] = SHIP;
+                        invalidate();
+                    } catch (ArrayIndexOutOfBoundsException ex) {
+                        return true;
+                    }
+                }
             }
         }
+        /*
+        TODO: Tähän ehtolause, jonka avulla rajoitetaan tähtäinasettelu vihollisruudukkoon vain,
+        jos on pelaajan vuoro eikä olla laivojenasettelutilassa.
+         */
+        // Tähtäimen asettaminen vihollisruudukkoon
 
+        if(event.getAction() == MotionEvent.ACTION_DOWN){
+            System.out.println(event.getX() + "," + event.getY());
+            if(event.getX() > (marginWidth * 2 + gridSideLength)) {
+                try {
+                    targetingX = (int) ((event.getX() - marginWidth * 2 - gridSideLength) / cellSideLength) - 1;
+                    targetingY = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
+                    System.out.println(targetingX + "," + targetingY);
+                    invalidate();
+                } catch (ArrayIndexOutOfBoundsException ex) {
+                    return true;
+                }
+            }
+        }
         return true;
     }
 }
