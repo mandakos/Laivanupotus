@@ -6,8 +6,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 
 public class ShipView extends View implements Runnable {
 
@@ -21,6 +23,8 @@ public class ShipView extends View implements Runnable {
     final int MISS = 3;
 
     final int CELLS = 10; //Ruutuja ruudukon yhdellä sivulla. Ruudukko on siis 10x10 ruutua
+
+    final String TAG = "ShipView";
 
     //Ruudukon piirtämiseen tarvittavat värit
     Paint gridPaint = new Paint(); //Tyhjä ruutu
@@ -73,6 +77,11 @@ public class ShipView extends View implements Runnable {
     boolean shipsBeingSet = true; //true = laivojenasettelutila, false = taistelutila. Näkymä alkaa oletuksena asettelutilassa
     boolean myTurn = false; //Oletuksena kummankaan pelaajan vuoro ei ole vielä. Pelaaja voi ampua vain kun on hänen vuoronsa
 
+    Ship battleship, cruiser, destroyer;
+
+    private String selectedOrientation; //Aktiviteetista saatava laivan asento
+    private int selectedShipType; //Aktiviteetista saatavat
+
     public ShipView(Context context) {
         super(context);
     }
@@ -81,11 +90,19 @@ public class ShipView extends View implements Runnable {
         super(context, attrs);
     }
 
+    public void setSelectedOrientation(String selectedOrientation) {
+        this.selectedOrientation = selectedOrientation;
+    }
+
+    public void setSelectedShipType(int selectedShipType) {
+        this.selectedShipType = selectedShipType;
+    }
+
     //Metodia kutsutaan kun näkymä piirretään
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         gridPaint.setStyle(Paint.Style.STROKE); //Piirtää oletuksena valkoisia ruutuja mustalla reunuksella
-        shipPaint.setStyle(Paint.Style.FILL_AND_STROKE); //Piirtää oletuksena täysin mustia ruutuja
+        shipPaint.setStyle(Paint.Style.FILL_AND_STROKE); //Piirtää oletuksena täysin mustia ruutuja (tarkemmin mustia ruutuja mustalla reunuksella)
         hitPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         missPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         targetPaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -125,12 +142,11 @@ public class ShipView extends View implements Runnable {
         availableHeight = viewHeight - 2 * marginHeight; // marginaalit tulevat ruudukkojen ylä- ja alapuolelle
 
         gridSideLength = availableWidth / 2;
-        System.out.println("Grid side length: " + gridSideLength);
         cellSideLength = gridSideLength / 10;
-        System.out.println("Cell side length: " + cellSideLength);
 
         myGrid = new int[CELLS][CELLS];
         enemyGrid = new int[CELLS][CELLS];
+
     }
 
     @Override
@@ -144,7 +160,6 @@ public class ShipView extends View implements Runnable {
         for(int i = 0; i < CELLS; i++) {
             float yPlacement = marginHeight + ((i + 1) * (cellSideLength));
             for(int j = 0; j < CELLS; j++){
-
                 float xPlacement = ((j + 1) * (cellSideLength));
                 if(myGrid[j][i] == SHIP){
                     canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, shipPaint);
@@ -180,6 +195,30 @@ public class ShipView extends View implements Runnable {
                         int x = (int) ((event.getX() - marginWidth) / cellSideLength);
                         int y = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
                         myGrid[x][y] = SHIP;
+                        Log.d(TAG, "You tried to create a ship with index  " + selectedShipType + " with " + selectedOrientation + " orientation.");
+                        switch(selectedShipType){
+                            case 0:
+                                if(battleship == null){
+                                    //battleship = new Ship(orientation, selectedShipType, x, y);
+                                }else{
+                                    Log.d(TAG, "Ship already created");
+                                }
+                                break;
+                            case 1:
+                                if(cruiser == null){
+                                    //cruiser = new Ship(orientation, selectedShipType, x, y);
+                                }else{
+                                    Log.d(TAG, "Ship already created");
+                                }
+                                break;
+                            case 2:
+                                if(destroyer == null){
+                                    //destroyer = new Ship(orientation, selectedShipType, x, y);
+                                }else{
+                                    Log.d(TAG, "Ship already created");
+                                }
+                                break;
+                        }
                         invalidate();
                     } catch (ArrayIndexOutOfBoundsException ex) {
                         return true;
@@ -194,12 +233,12 @@ public class ShipView extends View implements Runnable {
         // Tähtäimen asettaminen vihollisruudukkoon
 
         if(event.getAction() == MotionEvent.ACTION_DOWN){
-            System.out.println(event.getX() + "," + event.getY());
+            Log.d(TAG,event.getX() + "," + event.getY());
             if(event.getX() > (marginWidth * 2 + gridSideLength)) {
                 try {
                     targetingX = (int) ((event.getX() - marginWidth * 2 - gridSideLength) / cellSideLength) - 1;
                     targetingY = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
-                    System.out.println(targetingX + "," + targetingY);
+                    Log.d(TAG, targetingX + "," + targetingY);
                     invalidate();
                 } catch (ArrayIndexOutOfBoundsException ex) {
                     return true;
