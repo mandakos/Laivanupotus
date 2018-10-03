@@ -54,7 +54,6 @@ public class Ship {
                 shipCoordinatesX[0] = x;
                 shipCoordinatesY = new int[1];
                 shipCoordinatesY[0] = y;
-                System.out.println(centerX + "," + centerY);
                 break;
         }
 
@@ -64,16 +63,12 @@ public class Ship {
     private void populateCoordinates(){
         if(sType == shipType.BATTLESHIP || sType == shipType.CRUISER){
             int tmp = -size; //koon käänteisarvo
-            System.out.println("SHIP COORDINATES: ");
-            String parsedString;
             if(sOrientation == shipOrientation.HORIZONTAL){
                 shipCoordinatesY = new int[1];
                 shipCoordinatesY[0] = centerY;
                 shipCoordinatesX = new int[hitPoints];
                 for(int i = 0; i < hitPoints; i++){
                     shipCoordinatesX[i] = centerX + tmp;
-                    parsedString = shipCoordinatesX[i] + "," + centerY;
-                    System.out.println(parsedString);
                     tmp++;
                 }
             }else if(sOrientation == shipOrientation.VERTICAL){
@@ -82,8 +77,6 @@ public class Ship {
                 shipCoordinatesY = new int[hitPoints];
                 for(int i = 0; i < hitPoints; i++){
                     shipCoordinatesY[i] = centerY + tmp;
-                    parsedString = centerX + "," + shipCoordinatesY;
-                    System.out.println(parsedString);
                     tmp++;
                 }
             }
