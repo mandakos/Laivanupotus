@@ -194,6 +194,24 @@ public class ShipView extends View implements Runnable {
                     for(int i = 0; i < battleship.getSize(); i++){
                         myGrid[battleship.shipCoordinatesX[i]][centerY] = SHIP;
                     }
+                    //TODO: TÄMÄ KUSEE!!
+                    /*
+                    if(cruiser != null) {
+                        if (compareShipPositions(battleship.shipCoordinatesX, cruiser.shipCoordinatesX)) {
+                            System.out.println("Collision with cruiser!");
+                            clearShipFromGrid(cruiser);
+                            cruiser = null;
+                            invalidate();
+                        }
+                    }
+                    if(destroyer != null) {
+                        if(compareShipPositions(battleship.shipCoordinatesX, destroyer.shipCoordinatesX)){
+                            clearShipFromGrid(destroyer);
+                            destroyer = null;
+                            invalidate();
+                        }
+                    }
+                    */
                 }
             }else if(selectedOrientation == "Vertical"){
                 if(centerY < 2 || centerY > 8){
@@ -245,15 +263,28 @@ public class ShipView extends View implements Runnable {
         }
     }
 
+    //TODO: TÄMÄ KUNTOON!
     public boolean compareShipPositions(int ship1[], int ship2[]){
         for(int i = 0; i < ship1.length; i++){
             if(Arrays.asList(ship2).contains(ship1[i])){
+                System.out.println("There was a collision on ship1's coordinate " + ship1[i]);
                 return true;
             }
         }
         return false;
     }
 
+    public void clearShipFromGrid(Ship ship){
+        if(ship.getOrientation() == "HORIZONTAL"){
+            for(int i = 0; i < ship.getSize(); i++){
+                myGrid[ship.getIndexOfX(i)][ship.getIndexOfY(0)] = NOSHIP;
+            }
+        }else{
+            for(int i = 0; i < battleship.getSize(); i++){
+                myGrid[ship.getIndexOfX(0)][ship.getIndexOfY(i)] = NOSHIP;
+            }
+        }
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -267,21 +298,10 @@ public class ShipView extends View implements Runnable {
                     try {
                         int x = (int) ((event.getX() - marginWidth) / cellSideLength);
                         int y = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
-                        //myGrid[x][y] = SHIP;
-                        Log.d(TAG, x + "," + y);
-                        Log.d(TAG, "You tried to create a ship with index  " + selectedShipType + " with " + selectedOrientation + " orientation.");
                         switch(selectedShipType){
                             case 0:
                                 if(battleship != null){
-                                    if(battleship.getOrientation() == "HORIZONTAL"){
-                                        for(int i = 0; i < battleship.getSize(); i++){
-                                            myGrid[battleship.getIndexOfX(i)][battleship.getIndexOfY(0)] = NOSHIP;
-                                        }
-                                    }else{
-                                        for(int i = 0; i < battleship.getSize(); i++){
-                                            myGrid[battleship.getIndexOfX(0)][battleship.getIndexOfY(i)] = NOSHIP;
-                                        }
-                                    }
+                                    clearShipFromGrid(battleship);
                                     battleship = null;
                                     createBattleship(x, y);
                                 }else{
@@ -290,15 +310,7 @@ public class ShipView extends View implements Runnable {
                                 break;
                             case 1:
                                 if(cruiser != null){
-                                    if(cruiser.getOrientation() == "HORIZONTAL"){
-                                        for(int i = 0; i < cruiser.getSize(); i++){
-                                            myGrid[cruiser.getIndexOfX(i)][cruiser.getIndexOfY(0)] = NOSHIP;
-                                        }
-                                    }else{
-                                        for(int i = 0; i < cruiser.getSize(); i++){
-                                            myGrid[cruiser.getIndexOfX(0)][cruiser.getIndexOfY(i)] = NOSHIP;
-                                        }
-                                    }
+                                    clearShipFromGrid(cruiser);
                                     cruiser = null;
                                     createCruiser(x, y);
                                 }else{
@@ -307,7 +319,7 @@ public class ShipView extends View implements Runnable {
                                 break;
                             case 2:
                                 if(destroyer != null){
-                                    myGrid[destroyer.getIndexOfX(0)][destroyer.getIndexOfY(0)] = NOSHIP;
+                                    clearShipFromGrid(destroyer);
                                     destroyer = null;
                                     createDestroyer(x, y);
                                 }else{
@@ -329,7 +341,6 @@ public class ShipView extends View implements Runnable {
         // Tähtäimen asettaminen vihollisruudukkoon
 
         if(event.getAction() == MotionEvent.ACTION_DOWN){
-            Log.d(TAG,event.getX() + "," + event.getY());
             if(event.getX() > (marginWidth * 2 + gridSideLength)) {
                 try {
                     targetingX = (int) ((event.getX() - marginWidth * 2 - gridSideLength) / cellSideLength) - 1;
