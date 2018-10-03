@@ -27,7 +27,8 @@
         -->
         <activity
             android:name=".ShipSettingActivity"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:theme="@style/ShipViewTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

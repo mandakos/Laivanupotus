@@ -11,6 +11,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.Arrays;
+
 public class ShipView extends View implements Runnable {
 
     /*
@@ -182,11 +184,82 @@ public class ShipView extends View implements Runnable {
         }
     }
 
+    public void createBattleship(int centerX, int centerY) {
+        if(battleship == null){
+            if(selectedOrientation == "Horizontal"){
+                if(centerX < 2 || centerX > 8){
+                    Log.d(TAG, "About to go out of bounds");
+                }else{
+                    battleship = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+                    for(int i = 0; i < battleship.getSize(); i++){
+                        myGrid[battleship.shipCoordinatesX[i]][centerY] = SHIP;
+                    }
+                }
+            }else if(selectedOrientation == "Vertical"){
+                if(centerY < 2 || centerY > 8){
+                    Log.d(TAG, "About to go out of bounds");
+                }else{
+                    battleship = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+                    for (int i = 0; i < battleship.getSize(); i++) {
+                        myGrid[centerX][battleship.shipCoordinatesY[i]] = SHIP;
+                    }
+                }
+            }
+        }else{
+            Log.d(TAG, "Ship already created");
+        }
+    }
+
+    public void createCruiser(int centerX, int centerY){
+        if(cruiser == null){
+            if(selectedOrientation == "Horizontal"){
+                if(centerX < 1 || centerX > 9){
+                    Log.d(TAG, "About to go out of bounds");
+                }else{
+                    cruiser = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+                    for(int i = 0; i < cruiser.getSize(); i++){
+                        myGrid[cruiser.shipCoordinatesX[i]][centerY] = SHIP;
+                    }
+                }
+            }else if(selectedOrientation == "Vertical"){
+                if(centerY < 1 || centerY > 9){
+                    Log.d(TAG, "About to go out of bounds");
+                }else{
+                    cruiser = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+                    for (int i = 0; i < cruiser.getSize(); i++) {
+                        myGrid[centerX][cruiser.shipCoordinatesY[i]] = SHIP;
+                    }
+                }
+            }
+        }else{
+            Log.d(TAG, "Ship already created");
+        }
+    }
+
+    public void createDestroyer(int centerX, int centerY){
+        if(destroyer == null){
+            destroyer = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+            myGrid[destroyer.getIndexOfX(0)][destroyer.getIndexOfY(0)] = SHIP;
+        }else{
+            Log.d(TAG, "Ship already created");
+        }
+    }
+
+    public boolean compareShipPositions(int ship1[], int ship2[]){
+        for(int i = 0; i < ship1.length; i++){
+            if(Arrays.asList(ship2).contains(ship1[i])){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         /*
             Jos ollaan laivojenasettelutilassa, haetaan painallustapahtuman koordinaatit
-            ja tunnettujen mittojen avulla lasketaan mihin ruutuun laivaa yritetään asettaa
+            ja tunnettujen mittojen avulla lasketaan mihin ruutuun laivaa yritetään asettaa.
          */
         if(shipsBeingSet){
             if(event.getAction() == MotionEvent.ACTION_DOWN){
@@ -194,33 +267,56 @@ public class ShipView extends View implements Runnable {
                     try {
                         int x = (int) ((event.getX() - marginWidth) / cellSideLength);
                         int y = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
-                        myGrid[x][y] = SHIP;
+                        //myGrid[x][y] = SHIP;
+                        Log.d(TAG, x + "," + y);
                         Log.d(TAG, "You tried to create a ship with index  " + selectedShipType + " with " + selectedOrientation + " orientation.");
                         switch(selectedShipType){
                             case 0:
-                                if(battleship == null){
-                                    //battleship = new Ship(orientation, selectedShipType, x, y);
+                                if(battleship != null){
+                                    if(battleship.getOrientation() == "HORIZONTAL"){
+                                        for(int i = 0; i < battleship.getSize(); i++){
+                                            myGrid[battleship.getIndexOfX(i)][battleship.getIndexOfY(0)] = NOSHIP;
+                                        }
+                                    }else{
+                                        for(int i = 0; i < battleship.getSize(); i++){
+                                            myGrid[battleship.getIndexOfX(0)][battleship.getIndexOfY(i)] = NOSHIP;
+                                        }
+                                    }
+                                    battleship = null;
+                                    createBattleship(x, y);
                                 }else{
-                                    Log.d(TAG, "Ship already created");
+                                    createBattleship(x, y);
                                 }
                                 break;
                             case 1:
-                                if(cruiser == null){
-                                    //cruiser = new Ship(orientation, selectedShipType, x, y);
+                                if(cruiser != null){
+                                    if(cruiser.getOrientation() == "HORIZONTAL"){
+                                        for(int i = 0; i < cruiser.getSize(); i++){
+                                            myGrid[cruiser.getIndexOfX(i)][cruiser.getIndexOfY(0)] = NOSHIP;
+                                        }
+                                    }else{
+                                        for(int i = 0; i < cruiser.getSize(); i++){
+                                            myGrid[cruiser.getIndexOfX(0)][cruiser.getIndexOfY(i)] = NOSHIP;
+                                        }
+                                    }
+                                    cruiser = null;
+                                    createCruiser(x, y);
                                 }else{
-                                    Log.d(TAG, "Ship already created");
+                                    createCruiser(x, y);
                                 }
                                 break;
                             case 2:
-                                if(destroyer == null){
-                                    //destroyer = new Ship(orientation, selectedShipType, x, y);
+                                if(destroyer != null){
+                                    myGrid[destroyer.getIndexOfX(0)][destroyer.getIndexOfY(0)] = NOSHIP;
+                                    destroyer = null;
+                                    createDestroyer(x, y);
                                 }else{
-                                    Log.d(TAG, "Ship already created");
+                                    createDestroyer(x, y);
                                 }
                                 break;
                         }
                         invalidate();
-                    } catch (ArrayIndexOutOfBoundsException ex) {
+                    }catch (ArrayIndexOutOfBoundsException ex) {
                         return true;
                     }
                 }

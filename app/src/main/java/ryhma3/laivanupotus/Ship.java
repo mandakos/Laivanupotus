@@ -24,7 +24,6 @@ public class Ship {
     public int[] shipCoordinatesY;
 
     public Ship(String orientation, int st, int x, int y){
-        System.out.println("Orientation : " + orientation + "Ship Type: " + st);
         switch(orientation){
             case "Horizontal":
                 sOrientation = shipOrientation.HORIZONTAL;
@@ -55,7 +54,7 @@ public class Ship {
                 shipCoordinatesX[0] = x;
                 shipCoordinatesY = new int[1];
                 shipCoordinatesY[0] = y;
-                System.out.println(centerX + centerY);
+                System.out.println(centerX + "," + centerY);
                 break;
         }
 
@@ -72,9 +71,9 @@ public class Ship {
                 shipCoordinatesY[0] = centerY;
                 shipCoordinatesX = new int[hitPoints];
                 for(int i = 0; i < hitPoints; i++){
-                    parsedString = tmp + "," + centerY;
-                    System.out.println(parsedString);
                     shipCoordinatesX[i] = centerX + tmp;
+                    parsedString = shipCoordinatesX[i] + "," + centerY;
+                    System.out.println(parsedString);
                     tmp++;
                 }
             }else if(sOrientation == shipOrientation.VERTICAL){
@@ -82,12 +81,28 @@ public class Ship {
                 shipCoordinatesX[0] = centerX;
                 shipCoordinatesY = new int[hitPoints];
                 for(int i = 0; i < hitPoints; i++){
-                    parsedString = centerX + "," + tmp;
-                    System.out.println(parsedString);
                     shipCoordinatesY[i] = centerY + tmp;
+                    parsedString = centerX + "," + shipCoordinatesY;
+                    System.out.println(parsedString);
                     tmp++;
                 }
             }
         }
+    }
+
+    public String getOrientation(){
+        return sOrientation.toString();
+    }
+
+    public int getSize(){
+        return hitPoints;
+    }
+
+    public int getIndexOfX(int i){
+        return shipCoordinatesX[i];
+    }
+
+    public int getIndexOfY(int i){
+        return shipCoordinatesY[i];
     }
 }
