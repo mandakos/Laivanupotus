@@ -1,10 +1,11 @@
 package ryhma3.laivanupotus;
-
 import android.Manifest;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.lang.String;
 
 import static ryhma3.laivanupotus.MainActivity.REQUEST_ENABLE_BT;
 
@@ -36,22 +38,21 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     BluetoothDevice mBTDevice;
 
     Button btnServer;
-    Button btnClient;
+    //Button btnClient;
     Button btnEnableDisable_Discoverable;
     Button btnStartConnection;
     Button btnSend;
     EditText etSend;
     ListView lvNewDevices;
-    TextView incomingMessages;
+    TextView incomingMessages, textList;
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
     StringBuilder messages;
 
-    Context mContext;
 
     /*
-        BroadcastReceiver Bluetoothin päälle/pois laittamiselle
+        BroadcastReceiver Bluetoothin pÃ¤Ã¤lle/pois laittamiselle
      */
 
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
@@ -108,7 +109,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     };
 
     /*
-        Tämä BroadcastReceiver etsii laitteet, joita ei ole vielä paritettu
+        TÃ¤mÃ¤ BroadcastReceiver etsii laitteet, joita ei ole vielÃ¤ paritettu
      */
 
     private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
@@ -143,20 +144,40 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_BONDED");
                     mBTDevice = mDevice;
+                    textList.setText("Connected to " + mBTDevice.getName());
+
+                    // Dialog to ask if player wants to connect with selected device
+                    /*AlertDialog.Builder dialog = new AlertDialog.Builder(BluetoothActivity.this);
+                    dialog.setTitle("Start game");
+                    dialog.setMessage("Connect with '" + mBTDevice.getName() + "'?");
+                    dialog.setNegativeButton("No", null);
+                    dialog.setPositiveButton("Yes", new AlertDialog.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int t) {
+                            if (mBTDevice != null) {
+                                Log.d(TAG, "Start connection with " + mBTDevice.getName());
+                                startConnection();
+                            }
+                        }
+                    });
+                    dialog.show();*/
+
+                    //startNextActivity();
                 }
-                //Paritus käynnissä
+                //Paritus kÃ¤ynnissÃ¤
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_BONDING");
+                    textList.setText("Connecting to " + mBTDevice.getName());
                 }
                 //Paritus katkennut
                 if(mDevice.getBondState() == BluetoothDevice.BOND_NONE){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_NONE");
+                    textList.setText("Connection failed");
                 }
             }
         }
     };
 
-    // Täällä käsitellään saapuvia viestejä
+    // TÃ¤Ã¤llÃ¤ kÃ¤sitellÃ¤Ã¤n saapuvia viestejÃ¤
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -184,11 +205,12 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //Button btnONOFF = findViewById(R.id.btnONOFF);
-        //btnEnableDisable_Discoverable = findViewById(R.id.btnDiscoverable_on_off);
-        btnStartConnection = findViewById(R.id.btnStartConnection);
+        btnEnableDisable_Discoverable = findViewById(R.id.btnDiscoverable_on_off);
+        //btnStartConnection = findViewById(R.id.btnStartConnection);
 
-        btnClient = findViewById(R.id.btnClient);
-        btnServer = findViewById(R.id.btnServer);
+        textList = findViewById(R.id.textList);
+        //btnClient = findViewById(R.id.btnClient);
+        //btnServer = findViewById(R.id.btnServer);
         lvNewDevices = findViewById(R.id.lvNewDevices);
 
         btnSend = findViewById(R.id.btnSend);
@@ -208,28 +230,44 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         lvNewDevices.setOnItemClickListener(BluetoothActivity.this);
 
-        btnServer.setOnClickListener(new View.OnClickListener(){
-
+        // SERVER
+        /*btnServer.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: server");
+
+                // Remove all items from list
+                if (mBTDevices.size() > 0) {
+                    mDeviceListAdapter.clear();
+                    mDeviceListAdapter.notifyDataSetChanged();
+                }
+
                 checkBluetooth();
+                enableDiscoverability();
+                btnDiscover(v);
                 //startServer(v);
-                // TODO: Serverille ja clientille omat funktiot?
-                // Alempana koodissa kommentoituna BT_TTT:stä otettu esimerkki
             }
-        });
+        });*/
 
-        btnClient.setOnClickListener(new View.OnClickListener(){
-
+        // CLIENT
+        /*btnClient.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: client");
+
+                // Remove all previous devices from list
+                if (mBTDevices.size() > 0) {
+                    mDeviceListAdapter.clear();
+                    mDeviceListAdapter.notifyDataSetChanged();
+                }
+
                 checkBluetooth();
+                startClient(v);
+
+                // Get new devices to list
                 btnDiscover(v);
-                //startClient(v);
             }
-        });
+        });*/
 
 
         /*btnONOFF.setOnClickListener(new View.OnClickListener(){
@@ -241,12 +279,15 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
             }
         });*/
 
-        btnStartConnection.setOnClickListener(new View.OnClickListener() {
+        // START CONNECTION button
+        /*btnStartConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startConnection();
+                if (mBTDevice != null) {
+                    startConnection();
+                }
             }
-        });
+        });*/
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -258,30 +299,29 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         });
     }
 
-        /*  SERVER / CLIENT FUNKTIOT?
 
-        protected void startServer(View v){
+        /*protected void startServer(View v){
+            Log.d(TAG, "startServer");
         Button serverB=findViewById(R.id.btnServer);
         if (serverB.getText().toString().equals("Server")){
 
             // Start server
-            t = new AcceptThread();
-            t.start();
+            at.start();
             // Notify that server was started.
-            serverB.setText("Stop");
+            serverB.setText("Stop server");
             text.setText("Status: Server Active");
 
         }else{
             // Stop server if something goes wrong
-            if (t!=null) {
+            if (at!=null) {
 
-                t.cancel();
-                t.interrupt();
-                t=null;
+                at.cancel();
+                at.interrupt();
+                at=null;
             }
             // Display Server text when server is stopped.
             serverB.setText("Server");
-            text.setText("Status: -");
+            text.setText("Valitse Server tai Client");
         }
 
     }
@@ -291,23 +331,24 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         String deviceMacAddress;
 
         if (mBTDevice!=null && clientB.getText().toString().equals("Client")) {
-            String[] s = mBTDevice.split("\n");
+            String dev = mBTDevice.toString();
+            String[] s = dev.split("\n");
             deviceMacAddress = s[1];
 
             mBluetoothAdapter.cancelDiscovery();
             // Start connection
             BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceMacAddress);
-            new ConnectingThread(device).start();
+            ct.start();
             // Notify that client mode was selected.
             text.setText("Status: Client selected");
-            clientB.setText("Stop");
+            clientB.setText("Stop client");
         }
         else {
-            text.setText("Status:- ");
+            text.setText("Valitse Server tai Client");
             clientB.setText("Client");
         }
 
-    } */
+    }*/
 
     //Metodit yhteyden luomiselle.
     //Sovellus kaatuu jos paritusta ei ole tehty ensin
@@ -346,7 +387,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
         }
         if(mBluetoothAdapter.isEnabled()){
-           Log.d(TAG, "disabling BT");
+            Log.d(TAG, "disabling BT");
             mBluetoothAdapter.disable();
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver1, BTIntent);
@@ -380,6 +421,12 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         if(!mBluetoothAdapter.isDiscovering()){
             checkBTPermissions();
 
+            // Remove all previous devices from list
+            if (mBTDevices.size() > 0) {
+                mDeviceListAdapter.clear();
+                mDeviceListAdapter.notifyDataSetChanged();
+            }
+
             mBluetoothAdapter.startDiscovery();
             IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
@@ -388,7 +435,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
     /*
         Metodia tarvitaan, jos kohdelaitteen SDK > 23.
-        Näille laitteille ei riitä, jos laittaa luvat pelkästään manifestiin. Metodi ajetaan ainoastaan versioilla > LOLLIPOP
+        NÃ¤ille laitteille ei riitÃ¤, jos laittaa luvat pelkÃ¤stÃ¤Ã¤n manifestiin. Metodi ajetaan ainoastaan versioilla > LOLLIPOP
      */
 
     private void checkBTPermissions() {
@@ -407,24 +454,34 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //Jos Bluetooth-laitteiden listalla klikataan elementtiä, perutaan laitteiden etsintä ensin, sillä se syö paljon muistia
+        //Jos Bluetooth-laitteiden listalla klikataan elementtiÃ¤, perutaan laitteiden etsintÃ¤ ensin, sillÃ¤ se syÃ¶ paljon muistia
         mBluetoothAdapter.cancelDiscovery();
 
         Log.d(TAG, "onItemClick: You clicked a device.");
-        String deviceName = mBTDevices.get(position).getName();
+        final String deviceName = mBTDevices.get(position).getName();
         String deviceAddress = mBTDevices.get(position).getAddress();
 
         Log.d(TAG, "onItemClick: deviceName = " + deviceName);
         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
 
         //paritus
-        //createBond()-metodi vaatii suuremman Android SDK version entä JELLY_BEAN_MR2
+        //createBond()-metodi vaatii suuremman Android SDK version entÃ¤ JELLY_BEAN_MR2
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2){
             //Tallennetaan listalta valittu BT-laite laitteeksi, jonka kanssa kommunikoidaan ja avataan kommunikointiyhteys
             Log.d(TAG, "Trying to pair with " + deviceName);
             mBTDevices.get(position).createBond();
             mBTDevice = mBTDevices.get(position);
             mBluetoothConnection = new BluetoothConnectionService(BluetoothActivity.this);
+            startConnection();
+
         }
-    }
+
+        }
+
+        /*public static void startNextActivity(){
+
+            // Start ShipSettingActivity
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }*/
 }

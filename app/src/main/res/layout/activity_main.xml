@@ -2,51 +2,50 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:orientation="vertical"
-    android:gravity="center"
-    android:background="@drawable/laiva_bg">
+    android:gravity="center" >
+
+
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="201dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="124dp"
+            android:ems="10"
+            android:hint="Just for testing"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <!--app:layout_constraintTop_toBottomOf="@+id/btnClient"--> />
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="200dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:text="SEND"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText" />
 
     <TextView
-        android:id="@+id/textView_header"
+        android:id="@+id/incomingMessage"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textSize="@dimen/header_fontsize"
-        android:textStyle="bold"
-        android:layout_margin="30dp"
-        android:padding="30dp"
-        android:textColor="@color/backgroundColorDark"
-        android:text="@string/app_name" />
+        android:layout_height="33dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="left"
+        android:text="Incoming Messages"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnSend"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal">
 
-        <Button
-            android:id="@+id/button_new"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/big_button_fontsize"
-            android:padding="@dimen/big_button_padding"
-            android:layout_marginRight="20dp"
-            android:text="@string/button_new"
-            android:background="@color/backgroundColorDark"
-            android:textColor="@color/backgroundColorLight"/>
-
-        <Button
-            android:id="@+id/button_join"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/big_button_fontsize"
-            android:padding="@dimen/big_button_padding"
-            android:layout_marginLeft="20dp"
-            android:text="@string/button_join"
-            android:background="@color/backgroundColorDark"
-            android:textColor="@color/backgroundColorLight"/>
-    </LinearLayout>
 
 </LinearLayout>

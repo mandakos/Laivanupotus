@@ -12,44 +12,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:text="On/Off"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" /> -->
-
-    <!-- <Button
-        android:id="@+id/btnDiscoverable_on_off"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="btnEnableDisable_Discoverable"
-        android:text="Enable Discoverable"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="96dp" /> -->
-
-    <!-- <Button
-        android:id="@+id/btnFindUnpairedDevices"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="btnDiscover"
-        android:text="Discover"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="48dp" /> -->
+        app:layout_constraintBottom_toTopOf="@+id/btnFindUnpairedDevices"
+        app:layout_constraintStart_toStartOf="parent" /> -->
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraintLayout"
-        android:layout_width="213dp"
+        android:layout_width="211dp"
         android:layout_height="294dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-        <!-- TODO: Server ja client buttoneille jotku muut tekstit
-            esim. Uusi peli / Liity peliin? -->
-        <Button
+        <!---<Button
             android:id="@+id/btnServer"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
@@ -57,7 +37,7 @@
             android:layout_marginTop="8dp"
             android:text="Server"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/text" />
 
         <Button
             android:id="@+id/btnClient"
@@ -67,24 +47,51 @@
             android:layout_marginTop="8dp"
             android:text="Client"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnServer" />
+            app:layout_constraintTop_toBottomOf="@+id/btnServer" />-->
 
         <EditText
             android:id="@+id/editText"
-            android:layout_width="200dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_width="201dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="124dp"
             android:ems="10"
-            android:hint="Enter text here"
+            android:hint="Just for testing"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnClient" />
+            app:layout_constraintTop_toTopOf="parent" />
+        <!--app:layout_constraintTop_toBottomOf="@+id/btnClient"--> />
+
+        <Button
+            android:id="@+id/btnFindUnpairedDevices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:onClick="btnDiscover"
+            android:text="@string/button_join"
+            app:layout_constraintBottom_toTopOf="@+id/btnDiscoverable_on_off"
+            app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="@+id/constraintLayout"
+            app:layout_constraintTop_toTopOf="@+id/constraintLayout"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <Button
+            android:id="@+id/btnDiscoverable_on_off"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="184dp"
+            android:onClick="btnEnableDisable_Discoverable"
+            android:text="@string/button_new"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
+            app:layout_constraintStart_toStartOf="@+id/constraintLayout" />
 
         <Button
             android:id="@+id/btnSend"
             android:layout_width="200dp"
             android:layout_height="38dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             android:text="SEND"
             app:layout_constraintStart_toStartOf="parent"
@@ -95,11 +102,26 @@
             android:layout_width="wrap_content"
             android:layout_height="33dp"
             android:layout_marginStart="44dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:gravity="left"
             android:text="Incoming Messages"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnSend" />
+            app:layout_constraintTop_toBottomOf="@+id/btnSend"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <!--<TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Valitse Server tai Client"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />-->
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
@@ -115,28 +137,28 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/textList"
             android:layout_width="276dp"
             android:layout_height="27dp"
-            android:layout_marginEnd="44dp"
             android:layout_marginTop="16dp"
-            android:text="Valitse serveri"
+            android:layout_marginEnd="44dp"
+            android:text="Bluetooth devices:"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ListView
             android:id="@+id/lvNewDevices"
-            android:layout_width="280dp"
-            android:layout_height="184dp"
-            android:layout_marginEnd="44dp"
+            android:layout_width="276dp"
+            android:layout_height="241dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="44dp"
             android:headerDividersEnabled="false"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2">
+            app:layout_constraintTop_toBottomOf="@+id/textList">
 
         </ListView>
 
-        <Button
+        <!-- <Button
             android:id="@+id/btnStartConnection"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
@@ -147,7 +169,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/lvNewDevices"
-            app:layout_constraintVertical_bias="0.227" />
+            app:layout_constraintVertical_bias="0.227" /> -->
 
     </android.support.constraint.ConstraintLayout>
 
