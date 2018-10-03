@@ -2,6 +2,7 @@ package ryhma3.laivanupotus;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
@@ -9,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -192,6 +195,7 @@ public class BluetoothConnectionService {
             //Edistysdialogi suljetaan kun yhteys on valmis
             try{
                 mProgressDialog.dismiss();
+                BluetoothActivity.startNextActivity();
             }catch(NullPointerException e){
                 Log.e(TAG, "Null Pointer exception in ConnectedThread" + e.getMessage());
             }
@@ -249,6 +253,7 @@ public class BluetoothConnectionService {
                 e.printStackTrace();
             }
         }
+
     }
 
     private void connected(BluetoothSocket mSocket, BluetoothDevice mDevice){
@@ -269,4 +274,8 @@ public class BluetoothConnectionService {
         Log.d(TAG, "write: Write called");
         mConnectedThread.write(out);
     }
+
+
 }
+
+
