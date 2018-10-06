@@ -9,9 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 
-import java.util.Arrays;
 
 public class ShipView extends View implements Runnable {
 
@@ -82,7 +80,7 @@ public class ShipView extends View implements Runnable {
     Ship battleship, cruiser, destroyer;
 
     private String selectedOrientation; //Aktiviteetista saatava laivan asento
-    private int selectedShipType; //Aktiviteetista saatavat
+    private int selectedShipType; //Aktiviteetista saatavat laivatyypit
 
     public ShipView(Context context) {
         super(context);
@@ -184,93 +182,154 @@ public class ShipView extends View implements Runnable {
         }
     }
 
+    /*
+        Laivojen luonti on erityisen bugiherkkää aluetta. Sain osan bugeista liiskattua, mutta jokaisessa
+        metodissa on varmuuden vuoksi & ajan säästämiseksi mukana likainen try-catch-mekanismi,
+        jolla laiva nullataan tyypillisen bugin sattuessa.
+        Ensin jokaisen laivan sisäiset koordinaatit asetetaan luomalla olio. Tämän jälkeen tarkastellaan
+        onko mahdollisia törmäyksiä muiden laivojen kanssa. Jos törmäys havaitaan poistetaan laiva, jonka
+        kanssa törmäys tapahtui, ruudukosta. Vasta tämän jälkeen ruudukkoon asetetaan arvot, joissa asetettu
+        laiva sijaitsee. Näin ruudukkoon ei jää tyhjiä ruutuja, sinne missä törmäys tapahtui.
+    */
+
     public void createBattleship(int centerX, int centerY) {
-        if(battleship == null){
+        try{
+            //Laivan luominen
             if(selectedOrientation == "Horizontal"){
-                if(centerX < 2 || centerX > 8){
+                if(centerX <= 1 || centerX >= 8){
+                    battleship = null;
                     Log.d(TAG, "About to go out of bounds");
                 }else{
                     battleship = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+                }
+            }else if(selectedOrientation == "Vertical"){
+                if(centerY <= 1 || centerY >= 8){
+                    battleship = null;
+                    Log.d(TAG, "About to go out of bounds");
+                }else{
+                    battleship = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+                }
+            }
+            //Törmäysten tarkastelu
+            if(battleship != null){
+                if(cruiser != null){
+                    if(compareShipPositions(battleship.shipCoordinatesX, cruiser.shipCoordinatesX, battleship.shipCoordinatesY, cruiser.shipCoordinatesY)){
+                        clearShipFromGrid(cruiser);
+                        cruiser = null;
+                    }
+                }
+                if(destroyer != null){
+                    if(compareShipPositions(battleship.shipCoordinatesX, destroyer.shipCoordinatesX, battleship.shipCoordinatesY, destroyer.shipCoordinatesY)){
+                        clearShipFromGrid(destroyer);
+                        destroyer = null;
+                    }
+                }
+            }
+            //Ruudukkoon piirtäminen
+            if(battleship != null){
+                if(selectedOrientation == "Horizontal"){
+                    Log.d(TAG, "Drawing a horizontal battleship");
                     for(int i = 0; i < battleship.getSize(); i++){
                         myGrid[battleship.shipCoordinatesX[i]][centerY] = SHIP;
                     }
-                    //TODO: TÄMÄ KUSEE!!
-                    /*
-                    if(cruiser != null) {
-                        if (compareShipPositions(battleship.shipCoordinatesX, cruiser.shipCoordinatesX)) {
-                            System.out.println("Collision with cruiser!");
-                            clearShipFromGrid(cruiser);
-                            cruiser = null;
-                            invalidate();
-                        }
-                    }
-                    if(destroyer != null) {
-                        if(compareShipPositions(battleship.shipCoordinatesX, destroyer.shipCoordinatesX)){
-                            clearShipFromGrid(destroyer);
-                            destroyer = null;
-                            invalidate();
-                        }
-                    }
-                    */
-                }
-            }else if(selectedOrientation == "Vertical"){
-                if(centerY < 2 || centerY > 8){
-                    Log.d(TAG, "About to go out of bounds");
-                }else{
-                    battleship = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
-                    for (int i = 0; i < battleship.getSize(); i++) {
+                }else if(selectedOrientation == "Vertical"){
+                    Log.d(TAG, "Drawing a vertical battleship");
+                    for(int i = 0; i < battleship.getSize(); i++) {
                         myGrid[centerX][battleship.shipCoordinatesY[i]] = SHIP;
                     }
                 }
             }
-        }else{
-            Log.d(TAG, "Ship already created");
+        }catch(ArrayIndexOutOfBoundsException ex) {
+            battleship = null;
         }
     }
 
     public void createCruiser(int centerX, int centerY){
-        if(cruiser == null){
+        try{
             if(selectedOrientation == "Horizontal"){
-                if(centerX < 1 || centerX > 9){
+                if(centerX <= 0 || centerX >= 9){
                     Log.d(TAG, "About to go out of bounds");
                 }else{
                     cruiser = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+                }
+            }else if(selectedOrientation == "Vertical"){
+                if(centerY <= 0 || centerY > 9){
+                    Log.d(TAG, "About to go out of bounds");
+                }else{
+                    cruiser = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+                }
+            }
+            if(cruiser != null){
+                if(battleship != null){
+                    if(compareShipPositions(cruiser.shipCoordinatesX, battleship.shipCoordinatesX, cruiser.shipCoordinatesY, battleship.shipCoordinatesY)){
+                        clearShipFromGrid(battleship);
+                        battleship = null;
+                    }
+                }
+                if(destroyer != null){
+                    if(compareShipPositions(cruiser.shipCoordinatesX, destroyer.shipCoordinatesX, cruiser.shipCoordinatesY, destroyer.shipCoordinatesY)){
+                        clearShipFromGrid(destroyer);
+                        destroyer = null;
+                    }
+                }
+            }
+            if(cruiser != null){
+                if(selectedOrientation == "Horizontal"){
                     for(int i = 0; i < cruiser.getSize(); i++){
                         myGrid[cruiser.shipCoordinatesX[i]][centerY] = SHIP;
                     }
-                }
-            }else if(selectedOrientation == "Vertical"){
-                if(centerY < 1 || centerY > 9){
-                    Log.d(TAG, "About to go out of bounds");
-                }else{
-                    cruiser = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
-                    for (int i = 0; i < cruiser.getSize(); i++) {
+                }else if(selectedOrientation == "Vertical"){
+                    for(int i = 0; i < cruiser.getSize(); i++) {
                         myGrid[centerX][cruiser.shipCoordinatesY[i]] = SHIP;
                     }
                 }
             }
-        }else{
-            Log.d(TAG, "Ship already created");
+        }catch(ArrayIndexOutOfBoundsException ex){
+            cruiser = null;
         }
     }
 
     public void createDestroyer(int centerX, int centerY){
-        if(destroyer == null){
+        try{
             destroyer = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
+            if(destroyer != null){
+                if(battleship != null){
+                    if(compareShipPositions(destroyer.shipCoordinatesX, battleship.shipCoordinatesX, destroyer.shipCoordinatesY, battleship.shipCoordinatesY)){
+                        clearShipFromGrid(battleship);
+                        battleship = null;
+                    }
+                }
+                if(cruiser != null){
+                    if(compareShipPositions(destroyer.shipCoordinatesX, cruiser.shipCoordinatesX, destroyer.shipCoordinatesY, cruiser.shipCoordinatesY)){
+                        clearShipFromGrid(cruiser);
+                        cruiser = null;
+                    }
+                }
+            }
             myGrid[destroyer.getIndexOfX(0)][destroyer.getIndexOfY(0)] = SHIP;
-        }else{
-            Log.d(TAG, "Ship already created");
+        }catch(ArrayIndexOutOfBoundsException ex){
+            destroyer = null;
         }
     }
 
     //TODO: TÄMÄ KUNTOON!
-    public boolean compareShipPositions(int ship1[], int ship2[]){
-        for(int i = 0; i < ship1.length; i++){
-            if(Arrays.asList(ship2).contains(ship1[i])){
-                System.out.println("There was a collision on ship1's coordinate " + ship1[i]);
-                return true;
+    public boolean compareShipPositions(int ship1X[], int ship2X[], int ship1Y[], int ship2Y[]){
+
+        for(int i = 0; i < ship1X.length; i++){
+            for(int comparedX : ship2X){
+                if(ship1X[i] == comparedX){
+                    for(int j = 0; i < ship1Y.length; i++){
+                        for(int comparedY : ship2Y){
+                            if(ship1Y[j] == comparedY){
+                                Log.d(TAG, "Collision at: " + comparedX + "," +comparedY);
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
         }
+        Log.d(TAG, "No collisions");
         return false;
     }
 
@@ -280,7 +339,7 @@ public class ShipView extends View implements Runnable {
                 myGrid[ship.getIndexOfX(i)][ship.getIndexOfY(0)] = NOSHIP;
             }
         }else{
-            for(int i = 0; i < battleship.getSize(); i++){
+            for(int i = 0; i < ship.getSize(); i++){
                 myGrid[ship.getIndexOfX(0)][ship.getIndexOfY(i)] = NOSHIP;
             }
         }
@@ -295,45 +354,44 @@ public class ShipView extends View implements Runnable {
         if(shipsBeingSet){
             if(event.getAction() == MotionEvent.ACTION_DOWN){
                 if(event.getX() < (marginWidth + gridSideLength)) {
-                    try {
-                        int x = (int) ((event.getX() - marginWidth) / cellSideLength);
-                        int y = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
-                        switch(selectedShipType){
-                            case 0:
-                                if(battleship != null){
-                                    clearShipFromGrid(battleship);
-                                    battleship = null;
-                                    createBattleship(x, y);
-                                }else{
-                                    createBattleship(x, y);
-                                }
-                                break;
-                            case 1:
-                                if(cruiser != null){
-                                    clearShipFromGrid(cruiser);
-                                    cruiser = null;
-                                    createCruiser(x, y);
-                                }else{
-                                    createCruiser(x, y);
-                                }
-                                break;
-                            case 2:
-                                if(destroyer != null){
-                                    clearShipFromGrid(destroyer);
-                                    destroyer = null;
-                                    createDestroyer(x, y);
-                                }else{
-                                    createDestroyer(x, y);
-                                }
-                                break;
+                    int x = (int) ((event.getX() - marginWidth) / cellSideLength);
+                    int y = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
+                    System.out.println(x + "," + y);
+                    if((x >= 0 && x <= 9) && (y >= 0 && y <= 9)){
+                            switch (selectedShipType) {
+                                case 0:
+                                    if (battleship != null) {
+                                        clearShipFromGrid(battleship);
+                                        battleship = null;
+                                        createBattleship(x, y);
+                                    }else{
+                                        createBattleship(x, y);
+                                    }
+                                    break;
+                                case 1:
+                                    if (cruiser != null) {
+                                        clearShipFromGrid(cruiser);
+                                        cruiser = null;
+                                        createCruiser(x, y);
+                                    }else{
+                                        createCruiser(x, y);
+                                    }
+                                    break;
+                                case 2:
+                                    if (destroyer != null) {
+                                        clearShipFromGrid(destroyer);
+                                        destroyer = null;
+                                        createDestroyer(x, y);
+                                    }else{
+                                        createDestroyer(x, y);
+                                    }
+                                    break;
+                            }
+                            invalidate();
                         }
-                        invalidate();
-                    }catch (ArrayIndexOutOfBoundsException ex) {
-                        return true;
                     }
                 }
             }
-        }
         /*
         TODO: Tähän ehtolause, jonka avulla rajoitetaan tähtäinasettelu vihollisruudukkoon vain,
         jos on pelaajan vuoro eikä olla laivojenasettelutilassa.

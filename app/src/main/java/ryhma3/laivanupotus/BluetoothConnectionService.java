@@ -195,7 +195,9 @@ public class BluetoothConnectionService {
             //Edistysdialogi suljetaan kun yhteys on valmis
             try{
                 mProgressDialog.dismiss();
-                BluetoothActivity.startNextActivity();
+                //TODO! BT-yhteyden siirto aktiviteettien välillä
+                // HOXHOX, Kommentoin alla olevan pois, että pystyn tekemään buildin
+                //BluetoothActivity.startNextActivity();
             }catch(NullPointerException e){
                 Log.e(TAG, "Null Pointer exception in ConnectedThread" + e.getMessage());
             }
