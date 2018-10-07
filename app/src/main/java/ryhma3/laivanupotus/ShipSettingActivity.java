@@ -9,6 +9,7 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class ShipSettingActivity extends AppCompatActivity {
@@ -62,23 +63,24 @@ public class ShipSettingActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                //TODO: Varsinainen pelin alottaminen
-                /*
-                    Siirrä pelilogiikka ShipViewin run()-metodiin. Aloita Viewin säie täällä
-                    ja huolehdi sen turvallisesta käynnistämisestä booleanmuuttujien avulla.
-                    Katso mallia Langton's Ant -reposta.
-                 */
+                //TODO: Varsinainen pelin alottaminen, kommentoi toasti pois kun peli on valmis.
+                // shipView.startGame();
+                // fireButton.setEnabled(true);
+                Toast.makeText(getApplicationContext(), "WAITING IMPLEMENTATION", Toast.LENGTH_SHORT).show();
+
             }
         });
 
         fireButton = findViewById(R.id.fireButton);
+        //Kommentoi tämä pois, alussa ei saa olla mahdollista ampua
         //fireButton.setEnabled(false);
         fireButton.setOnClickListener(new Button.OnClickListener(){
 
             @Override
             public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "WAITING IMPLEMENTATION", Toast.LENGTH_SHORT).show();
                 //TODO: Ampumisen ohjelmalogiikka
-                // Tässäkin kannattaa varmaan kutsua Viewiin tehtävää fire()-metodia
+                // Tässäkin kannattaa varmaan kutsua Viewiin tehtävää fire()-metodia. Fire()-metodia tulisi puolestaan kutsua Viewin run()-metodissa oikeassa kohti
             }
         });
     }

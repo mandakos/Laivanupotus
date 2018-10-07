@@ -76,11 +76,14 @@ public class ShipView extends View implements Runnable {
     //Boolean-muuttujat, joilla tutkitaan onko näkymä tietyssä tilassa
     boolean shipsBeingSet = true; //true = laivojenasettelutila, false = taistelutila. Näkymä alkaa oletuksena asettelutilassa
     boolean myTurn = false; //Oletuksena kummankaan pelaajan vuoro ei ole vielä. Pelaaja voi ampua vain kun on hänen vuoronsa
+    boolean threadRunning = false; //Käytetään pelisäikeen turvalliseen käynnistämiseen
 
     Ship battleship, cruiser, destroyer;
 
     private String selectedOrientation; //Aktiviteetista saatava laivan asento
     private int selectedShipType; //Aktiviteetista saatavat laivatyypit
+
+    Thread gameThread;
 
     public ShipView(Context context) {
         super(context);
@@ -149,9 +152,32 @@ public class ShipView extends View implements Runnable {
 
     }
 
+    //Pelisäikeen turvallinen käynnistäminen
+    public void startGame(){
+        if(gameThread == null){
+            gameThread = new Thread(this);
+            threadRunning = true;
+            gameThread.start();
+        }
+    }
+
+    //Pelisäikeen turvallinen lopettaminen
+    public void endGame(){
+        if(gameThread != null){
+            gameThread.interrupt();
+            threadRunning = false;
+            gameThread = null;
+            //TODO: Mahdollinen ruutu revanssia / pelin tulosten tarkastelua varten
+        }
+    }
+
+
     @Override
     public void run() {
-        postInvalidate(); //Aja tämä viimeiseksi, jotta näkymä tiedetään piirtää uudestaan
+        while(threadRunning){
+            //TODO: Pelilogiikka tänne!
+            postInvalidate(); //Aja tämä viimeiseksi, jotta näkymä tiedetään piirtää uudestaan
+        }
     }
 
     @Override
@@ -189,28 +215,33 @@ public class ShipView extends View implements Runnable {
         Ensin jokaisen laivan sisäiset koordinaatit asetetaan luomalla olio. Tämän jälkeen tarkastellaan
         onko mahdollisia törmäyksiä muiden laivojen kanssa. Jos törmäys havaitaan poistetaan laiva, jonka
         kanssa törmäys tapahtui, ruudukosta. Vasta tämän jälkeen ruudukkoon asetetaan arvot, joissa asetettu
-        laiva sijaitsee. Näin ruudukkoon ei jää tyhjiä ruutuja, sinne missä törmäys tapahtui.
+        laiva sijaitsee. Näin ruudukkoon ei jää tyhjiä ruutuja, sinne missä törmäys tapahtui. Tulevaisuutta varten:
+        Tämä luontilogiikka olisi kannattanut ehkä hoitaa Factory-suunnittelufilosofian mukaisesti.
     */
 
     public void createBattleship(int centerX, int centerY) {
         try{
-            //Laivan luominen
+            /*
+            Laivan luominen, klikkaustapahtuman koordinaatit ovat laivan keskipiste.
+            Jos keskipiste on liian lähellä reunoja ei laivaa piirretä.
+             */
             if(selectedOrientation == "Horizontal"){
                 if(centerX <= 1 || centerX >= 8){
                     battleship = null;
-                    Log.d(TAG, "About to go out of bounds");
                 }else{
                     battleship = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
                 }
             }else if(selectedOrientation == "Vertical"){
                 if(centerY <= 1 || centerY >= 8){
                     battleship = null;
-                    Log.d(TAG, "About to go out of bounds");
                 }else{
                     battleship = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
                 }
             }
-            //Törmäysten tarkastelu
+            /*
+            Törmäysten tarkastelu, kts. compareShipPositions()-metodin kommentti. Törmäyksen aiheuttava
+            laiva poistetaan ruudukosta.
+             */
             if(battleship != null){
                 if(cruiser != null){
                     if(compareShipPositions(battleship.shipCoordinatesX, cruiser.shipCoordinatesX, battleship.shipCoordinatesY, cruiser.shipCoordinatesY)){
@@ -228,12 +259,10 @@ public class ShipView extends View implements Runnable {
             //Ruudukkoon piirtäminen
             if(battleship != null){
                 if(selectedOrientation == "Horizontal"){
-                    Log.d(TAG, "Drawing a horizontal battleship");
                     for(int i = 0; i < battleship.getSize(); i++){
                         myGrid[battleship.shipCoordinatesX[i]][centerY] = SHIP;
                     }
                 }else if(selectedOrientation == "Vertical"){
-                    Log.d(TAG, "Drawing a vertical battleship");
                     for(int i = 0; i < battleship.getSize(); i++) {
                         myGrid[centerX][battleship.shipCoordinatesY[i]] = SHIP;
                     }
@@ -248,13 +277,13 @@ public class ShipView extends View implements Runnable {
         try{
             if(selectedOrientation == "Horizontal"){
                 if(centerX <= 0 || centerX >= 9){
-                    Log.d(TAG, "About to go out of bounds");
+                    cruiser = null;
                 }else{
                     cruiser = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
                 }
             }else if(selectedOrientation == "Vertical"){
                 if(centerY <= 0 || centerY > 9){
-                    Log.d(TAG, "About to go out of bounds");
+                    cruiser = null;
                 }else{
                     cruiser = new Ship(selectedOrientation, selectedShipType, centerX, centerY);
                 }
@@ -312,16 +341,18 @@ public class ShipView extends View implements Runnable {
         }
     }
 
-    //TODO: TÄMÄ KUNTOON!
     public boolean compareShipPositions(int ship1X[], int ship2X[], int ship1Y[], int ship2Y[]){
-
+        /*
+            Tarkastellaan ensin löytyykö laivoista samoja X-koordinaattipisteitä. Jos pisteitä
+            löytyy, tarkastellaan sen pisteen Y-koordinaattia mahdollisen törmäyksen aiheuttavan
+            laivan Y-koordinaatteihin. Jos löytyy sama Y-koordinaatti, törmäys tapahtuu.
+         */
         for(int i = 0; i < ship1X.length; i++){
             for(int comparedX : ship2X){
                 if(ship1X[i] == comparedX){
-                    for(int j = 0; i < ship1Y.length; i++){
+                    for(int j = 0; j < ship1Y.length; j++){
                         for(int comparedY : ship2Y){
                             if(ship1Y[j] == comparedY){
-                                Log.d(TAG, "Collision at: " + comparedX + "," +comparedY);
                                 return true;
                             }
                         }
@@ -329,10 +360,10 @@ public class ShipView extends View implements Runnable {
                 }
             }
         }
-        Log.d(TAG, "No collisions");
         return false;
     }
 
+    //Asetetaan törmäyksen sattuessa ruudukosta poistetun laivan koordinaatit tyhjäksi.
     public void clearShipFromGrid(Ship ship){
         if(ship.getOrientation() == "HORIZONTAL"){
             for(int i = 0; i < ship.getSize(); i++){
@@ -356,7 +387,7 @@ public class ShipView extends View implements Runnable {
                 if(event.getX() < (marginWidth + gridSideLength)) {
                     int x = (int) ((event.getX() - marginWidth) / cellSideLength);
                     int y = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
-                    System.out.println(x + "," + y);
+                    //System.out.println(x + "," + y);
                     if((x >= 0 && x <= 9) && (y >= 0 && y <= 9)){
                             switch (selectedShipType) {
                                 case 0:
@@ -392,10 +423,10 @@ public class ShipView extends View implements Runnable {
                     }
                 }
             }
-        /*
+        /**
         TODO: Tähän ehtolause, jonka avulla rajoitetaan tähtäinasettelu vihollisruudukkoon vain,
         jos on pelaajan vuoro eikä olla laivojenasettelutilassa.
-         */
+         **/
         // Tähtäimen asettaminen vihollisruudukkoon
 
         if(event.getAction() == MotionEvent.ACTION_DOWN){
