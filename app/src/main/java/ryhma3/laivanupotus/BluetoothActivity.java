@@ -22,7 +22,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.lang.String;
@@ -35,7 +34,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
     BluetoothAdapter mBluetoothAdapter;
     BluetoothConnectionService mBluetoothConnection;
-    BluetoothDevice mBTDevice;
+    BluetoothDevice mBTDevice = null;
 
     Button btnServer;
     //Button btnClient;
@@ -45,10 +44,13 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     EditText etSend;
     ListView lvNewDevices;
     TextView incomingMessages, textList;
+    String deviceAddress;
+    static Boolean nextActivity = false; // tämä kun muuttuu trueksi, vaihdetaan seuraavaan activityyn
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
     StringBuilder messages;
+    private static final int Finished_Activity = 1;
 
 
     /*
@@ -145,23 +147,6 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
                     Log.d(TAG, "BroadcastReceiver4 : BOND_BONDED");
                     mBTDevice = mDevice;
                     textList.setText("Connected to " + mBTDevice.getName());
-
-                    // Dialog to ask if player wants to connect with selected device
-                    /*AlertDialog.Builder dialog = new AlertDialog.Builder(BluetoothActivity.this);
-                    dialog.setTitle("Start game");
-                    dialog.setMessage("Connect with '" + mBTDevice.getName() + "'?");
-                    dialog.setNegativeButton("No", null);
-                    dialog.setPositiveButton("Yes", new AlertDialog.OnClickListener(){
-                        public void onClick(DialogInterface dialog, int t) {
-                            if (mBTDevice != null) {
-                                Log.d(TAG, "Start connection with " + mBTDevice.getName());
-                                startConnection();
-                            }
-                        }
-                    });
-                    dialog.show();*/
-
-                    //startNextActivity();
                 }
                 //Paritus kÃ¤ynnissÃ¤
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
@@ -289,14 +274,14 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
             }
         });*/
 
-        btnSend.setOnClickListener(new View.OnClickListener() {
+        /*btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
                 mBluetoothConnection.write(bytes);
                 etSend.setText("");
             }
-        });
+        });*/
     }
 
 
@@ -360,7 +345,9 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     public void startBTConnection(BluetoothDevice device, UUID uuid){
         Log.d(TAG, "startBTConnection : Initializing RFCOM Bluetooth Connection");
 
-        mBluetoothConnection.startClient(device, uuid);
+        // Get the BluetoothDevice object
+        BluetoothDevice btdevice = mBluetoothAdapter.getRemoteDevice(deviceAddress);
+        mBluetoothConnection.startClient(btdevice, uuid);
     }
 
     @Override
@@ -459,7 +446,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
         Log.d(TAG, "onItemClick: You clicked a device.");
         final String deviceName = mBTDevices.get(position).getName();
-        String deviceAddress = mBTDevices.get(position).getAddress();
+        deviceAddress = mBTDevices.get(position).getAddress();
 
         Log.d(TAG, "onItemClick: deviceName = " + deviceName);
         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
@@ -474,14 +461,45 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
             mBluetoothConnection = new BluetoothConnectionService(BluetoothActivity.this);
             startConnection();
 
-        }
+            // Tämä Activity jää nyt looppiin odottamaan "vastausta" BluetoothConnectionServiceltä
+
+            Boolean loop = true;
+            while(loop){
+                if(nextActivity == true){
+                    startNextActivity(mBTDevice);
+                    loop = false;
+                }
+            }
 
         }
 
-        /*public static void startNextActivity(){
+    }
 
-            // Start ShipSettingActivity
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        }*/
+
+        public void startNextActivity(final BluetoothDevice device){
+
+            Log.d(TAG, "startNextActivity " + device);
+
+            // Dialog to ask if player wants to connect with selected device
+                AlertDialog.Builder dialog = new AlertDialog.Builder(BluetoothActivity.this);
+                dialog.setTitle("Start game");
+                dialog.setMessage("Start game with '" + device.getName() + "'?");
+                dialog.setNegativeButton("No", null);
+                dialog.setPositiveButton("Yes", new AlertDialog.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int t) {
+                        if (device != null) {
+                            Log.d(TAG, "Start game with " + device.getName());
+                            Intent intent = new Intent(BluetoothActivity.this, ShipSettingActivity.class);
+                            startActivityForResult(intent, Finished_Activity);
+                        }
+                    }
+                });
+                dialog.show();
+        }
+
+    public static void setBoolean(Boolean b) {
+        // Tätä funktiota kutsutaan Bluetoothconnectionservicessä,
+        // sieltä ilmoitetaan tänne Boolean muuttujalla kun Bluetooth on ok
+        nextActivity = b;
+    }
 }
