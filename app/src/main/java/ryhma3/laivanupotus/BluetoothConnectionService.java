@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -181,6 +182,10 @@ public class BluetoothConnectionService {
             mConnectThread.cancel();
             mConnectThread = null;
         }
+        if (mConnectedThread != null) {
+            mConnectedThread.cancel();
+            mConnectedThread = null;
+        }
         if(mInsecureAcceptThread == null){
             mInsecureAcceptThread = new AcceptThread();
             mInsecureAcceptThread.start();
@@ -202,33 +207,31 @@ public class BluetoothConnectionService {
 
     private class ConnectedThread extends Thread{
         private final BluetoothSocket mSocket;
-        //private final InputStream inStream;
-        //private final OutputStream outStream;
+        private final InputStream inStream;
+        private final OutputStream outStream;
 
         public ConnectedThread(BluetoothSocket socket){
             Log.d(TAG, "ConnectedThread: Starting! ");
             mSocket = socket;
-            //InputStream tmpIn = null;
-            //OutputStream tmpOut = null;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
 
             //Edistysdialogi suljetaan kun yhteys on valmis
             try{
                 mProgressDialog.dismiss();
-                //TODO! BT-yhteyden siirto aktiviteettien välillä
-                // HOXHOX, Kommentoin alla olevan pois, että pystyn tekemään buildin
-                //BluetoothActivity.startNextActivity();
+
+                // Kun bluetooth yhteys on tehty, käsketään BluetoothActivityssä avaamaan seuraava activity
+                BluetoothActivity btActivity = BluetoothActivity.getInstance();
+                btActivity.startNextActivity(mDevice);
+
             }catch(NullPointerException e){
                 Log.e(TAG, "Null Pointer exception in ConnectedThread" + e.getMessage());
             }
 
             Log.d(TAG, "ConnectedThread OK");
 
-            // Tässä vaiheessa bluetooth yhteys on tehty,
-            // välitetään BluetoothActivitylle boolean muuttuja jonka avulla se tietää
-            // vaihtaa ShipSettingActivityyn:
-            BluetoothActivity.setBoolean(true);
 
-           /* try{
+           try{
                 tmpIn = mSocket.getInputStream();
                 tmpOut = mSocket.getOutputStream();
             }catch(IOException e){
@@ -259,11 +262,11 @@ public class BluetoothConnectionService {
                     Log.e(TAG, "read: Error reading from inputstream. " + e.getMessage());
                     break;
                 }
-            }*/
+            }
         }
 
         //Kutsu aktiviteetista datan lähettämiseksi
-        /*public void write(byte[] bytes){
+        public void write(byte[] bytes){
             String text = new String(bytes, Charset.defaultCharset());
             Log.d(TAG, "write: Writing to outputstream: " + text);
             try{
@@ -271,7 +274,7 @@ public class BluetoothConnectionService {
             }catch(IOException e){
                 Log.e(TAG, "write: Error writing to outputstream. " + e.getMessage());
             }
-        }*/
+        }
 
         //Kutsu aktiviteetista yhteyden katkaisemiseksi
         public void cancel(){
@@ -300,10 +303,10 @@ public class BluetoothConnectionService {
         Katso ConnectedThreadin write()-metodi. Käytä siis tätä metodia, kun lähetetään dataa.
      */
 
-    /*public void write(byte[] out){
+    public void write(byte[] out){
         Log.d(TAG, "write: Write called");
         mConnectedThread.write(out);
-    }*/
+    }
 
 
 }
