@@ -411,10 +411,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     public void onStart() {
         super.onStart();
 
-        // Tarkista Bluetooth
-        if (!mBluetoothAdapter.isEnabled()) {
-            checkBluetooth();
-        }
+
 
     }
 
@@ -424,12 +421,17 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         // onResumessa käynnistetään AcceptThread eli serveri
         super.onResume();
 
-        if (mBluetoothConnection == null) {
-            Log.d(TAG, "Start Acceptthread onResume");
-            BluetoothConnectionService mBluetoothConnection = new BluetoothConnectionService(this);
+        // Tarkista Bluetooth
+        if (!mBluetoothAdapter.isEnabled()) {
+            checkBluetooth();
+            if (mBluetoothConnection == null && mBluetoothAdapter.isEnabled()) {
+                Log.d(TAG, "Start Acceptthread onResume");
+                BluetoothConnectionService mBluetoothConnection = new BluetoothConnectionService(this);
                 mBluetoothConnection.start();
-        } else {
-            Log.d(TAG, "onResume .start() failed");
+            } else {
+                Log.d(TAG, "onResume .start() failed");
+            }
         }
+
         }
 }
