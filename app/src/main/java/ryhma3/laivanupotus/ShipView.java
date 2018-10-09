@@ -376,6 +376,21 @@ public class ShipView extends View implements Runnable {
         }
     }
 
+    public boolean fire(){
+        if(enemyGrid[targetingX][targetingY] == SHIP){
+            enemyGrid[targetingX][targetingY] = HIT;
+            return true;
+        }else{
+            if(enemyGrid[targetingX][targetingY] == NOSHIP){
+                enemyGrid[targetingX][targetingY] = MISS;
+            }else if(enemyGrid[targetingX][targetingY] == MISS){
+                Log.d(TAG, "Player is trying to fire into a square that has already been upon and missed");
+                //TODO: Mekanismi hellävaraiselle muistutukselle että näin ei ehkä kannattaisi tehdä
+            }
+            return false;
+        }
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         /*
