@@ -41,6 +41,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
     Button btnEnableDisable_Discoverable;
     Button btnSend;
+    Button btnStartConnection;
     EditText etSend;
     ListView lvNewDevices;
     TextView incomingMessages;
@@ -146,17 +147,17 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_BONDED");
                     mBTDevice = mDevice;
-                    //textList.setText("Connected to " + mBTDevice.getName());
+                    textList.setText("Connected to " + mBTDevice.getName());
                 }
                 //Paritus kÃ¤ynnissÃ¤
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_BONDING");
-                    //textList.setText("Connecting to " + mBTDevice.getName());
+                    textList.setText("Connecting to " + mBTDevice.getName());
                 }
                 //Paritus katkennut
                 if(mDevice.getBondState() == BluetoothDevice.BOND_NONE){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_NONE");
-                    //textList.setText("Connection failed");
+                    textList.setText("Connection failed");
                 }
             }
         }
@@ -192,7 +193,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
         //Button btnONOFF = findViewById(R.id.btnONOFF);
         btnEnableDisable_Discoverable = findViewById(R.id.btnDiscoverable_on_off);
-        //btnStartConnection = findViewById(R.id.btnStartConnection);
+        btnStartConnection = findViewById(R.id.btnStartConnection);
 
         textList = findViewById(R.id.textList);
         lvNewDevices = findViewById(R.id.lvNewDevices);
@@ -225,21 +226,23 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         });*/
 
         // START CONNECTION button
-        /*btnStartConnection.setOnClickListener(new View.OnClickListener() {
+        btnStartConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mBTDevice != null) {
-                    startConnection();
+                if (mBluetoothConnection != null) {
+                    startNextActivity();
                 }
             }
-        });*/
+        });
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
-                mBluetoothConnection.write(bytes);
-                etSend.setText("");
+                if(mBluetoothConnection != null){
+                    byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
+                    mBluetoothConnection.write(bytes);
+                    etSend.setText("");
+                }
             }
         });
     }
@@ -309,6 +312,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
     public void btnDiscover(View view) {
         Log.d(TAG, "btnDiscover: Looking for unpaired devices.");
+        textList.setText("Looking for bluetooth devices...");
 
         if(mBluetoothAdapter.isDiscovering()){
             mBluetoothAdapter.cancelDiscovery();
@@ -365,6 +369,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
         Log.d(TAG, "onItemClick: deviceName = " + deviceName);
         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
+        textList.setText("Chosen device:\n" + deviceName);
 
         //paritus
         //createBond()-metodi vaatii suuremman Android SDK version entÃ¤ JELLY_BEAN_MR2
@@ -384,36 +389,12 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
             Log.d(TAG, "startNextActivity ");
 
-            // Dialog to ask if player wants to connect with selected device
-                /*AlertDialog.Builder dialog = new AlertDialog.Builder(BluetoothActivity.this);
-                dialog.setTitle("Start game");
-                dialog.setMessage("Start game with '" + device.getName() + "'?");
-                dialog.setNegativeButton("No", null);
-                dialog.setPositiveButton("Yes", new AlertDialog.OnClickListener(){
-                    public void onClick(DialogInterface dialog, int t) {
-                        if (device != null) {
-                            Log.d(TAG, "Start game with " + device.getName());
-                            Intent intent = new Intent(BluetoothActivity.this, ShipSettingActivity.class);
-                            startActivityForResult(intent, Finished_Activity);
-                        }
-                    }
-                });
-                dialog.show();*/
-
                 // Käynnistetään uusi activity
                 Log.d(TAG, "Start game ");
                 Intent intent = new Intent(BluetoothActivity.this, ShipSettingActivity.class);
                 startActivityForResult(intent, Finished_Activity);
         }
 
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-
-
-    }
 
     @Override
     public void onResume() {

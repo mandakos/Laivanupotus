@@ -228,9 +228,9 @@ public class BluetoothConnectionService {
                 }
 
                 // Kun bluetooth yhteys on tehty, käsketään BluetoothActivityssä avaamaan seuraava activity
-                BluetoothActivity btActivity = BluetoothActivity.getInstance();
-                btActivity.startNextActivity();
-                Log.i(TAG, "Start ShipSettingActivity");
+                //BluetoothActivity btActivity = BluetoothActivity.getInstance();
+                //btActivity.startNextActivity();
+                //Log.i(TAG, "Start ShipSettingActivity");
 
 
             }catch(NullPointerException e){
