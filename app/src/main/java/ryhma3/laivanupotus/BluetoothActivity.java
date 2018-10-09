@@ -380,9 +380,9 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
     }
         // Kutsutaan BluetoothConnectionServicen ConnectedThreadissa
-        public void startNextActivity(final BluetoothDevice device){
+        public void startNextActivity(){
 
-            Log.d(TAG, "startNextActivity " + device);
+            Log.d(TAG, "startNextActivity ");
 
             // Dialog to ask if player wants to connect with selected device
                 /*AlertDialog.Builder dialog = new AlertDialog.Builder(BluetoothActivity.this);
@@ -401,11 +401,9 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
                 dialog.show();*/
 
                 // Käynnistetään uusi activity
-            if (device != null) {
-                Log.d(TAG, "Start game with " + device.getName());
+                Log.d(TAG, "Start game ");
                 Intent intent = new Intent(BluetoothActivity.this, ShipSettingActivity.class);
                 startActivityForResult(intent, Finished_Activity);
-            }
         }
 
 

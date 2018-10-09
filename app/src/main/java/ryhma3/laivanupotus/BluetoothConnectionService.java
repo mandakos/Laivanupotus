@@ -77,7 +77,12 @@ public class BluetoothConnectionService {
             }
 
             if(socket != null){
+                Log.i(TAG, "Server connect");
+
                 connected(socket, socket.getRemoteDevice());
+
+                Log.i(TAG, "Server connected");
+
             }
 
             Log.i(TAG, "END mAcceptThread");
@@ -218,11 +223,15 @@ public class BluetoothConnectionService {
 
             //Edistysdialogi suljetaan kun yhteys on valmis
             try{
-                mProgressDialog.dismiss();
+                if(mProgressDialog != null){
+                    mProgressDialog.dismiss();
+                }
 
                 // Kun bluetooth yhteys on tehty, käsketään BluetoothActivityssä avaamaan seuraava activity
                 BluetoothActivity btActivity = BluetoothActivity.getInstance();
-                btActivity.startNextActivity(mDevice);
+                btActivity.startNextActivity();
+                Log.i(TAG, "Start ShipSettingActivity");
+
 
             }catch(NullPointerException e){
                 Log.e(TAG, "Null Pointer exception in ConnectedThread" + e.getMessage());
