@@ -33,11 +33,11 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     private static final String TAG = "BluetoothActivity";
     private static final UUID UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
-    static BluetoothActivity instance;
+    //static BluetoothActivity instance;
 
     BluetoothAdapter mBluetoothAdapter;
     BluetoothConnectionService mBluetoothConnection;
-    BluetoothDevice mBTDevice = null;
+    BluetoothDevice mBTDevice;
 
     Button btnEnableDisable_Discoverable;
     Button btnSend;
@@ -46,7 +46,6 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     ListView lvNewDevices;
     TextView incomingMessages;
     TextView textList;
-    String deviceAddress;
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
@@ -188,9 +187,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bt);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); //set orientation to landscape
-        instance = this;
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
+        //instance = this;
         //Button btnONOFF = findViewById(R.id.btnONOFF);
         btnEnableDisable_Discoverable = findViewById(R.id.btnDiscoverable_on_off);
         btnStartConnection = findViewById(R.id.btnStartConnection);
@@ -205,12 +202,11 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         mBTDevices = new ArrayList<>();
         messages = new StringBuilder();
 
-        //LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("incomingMessage"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("incomingMessage"));
 
         //Kutsutaan kun paritus tapahtuu
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver4, filter);
-
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         lvNewDevices.setOnItemClickListener(BluetoothActivity.this);
@@ -229,6 +225,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         btnStartConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "btnStartConnection Clicked");
                 if (mBluetoothConnection != null) {
                     startNextActivity();
                 }
@@ -247,9 +244,10 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         });
     }
 
+    /*
     public static BluetoothActivity getInstance() {
         return instance;
-    }
+    }*/
 
 
     //Metodit yhteyden luomiselle.
@@ -262,22 +260,20 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     public void startBTConnection(BluetoothDevice device, UUID uuid){
         Log.d(TAG, "startBTConnection : Initializing RFCOM Bluetooth Connection");
 
-        // Get the BluetoothDevice object
-        BluetoothDevice btdevice = mBluetoothAdapter.getRemoteDevice(deviceAddress);
-        mBluetoothConnection.startClient(btdevice, uuid);
+        mBluetoothConnection.startClient(device, uuid);
     }
 
     @Override
     protected void onDestroy(){
         Log.d(TAG, "onDestroy called.");
         super.onDestroy();
-        unregisterReceiver(mBroadcastReceiver1);
+        //unregisterReceiver(mBroadcastReceiver1);
         unregisterReceiver(mBroadcastReceiver2);
         unregisterReceiver(mBroadcastReceiver3);
         unregisterReceiver(mBroadcastReceiver4);
     }
 
-    public void enableDisableBT() {
+    /*public void enableDisableBT() {
         if(mBluetoothAdapter == null){
             Log.d(TAG, "enableDisableBT: Does not have BT capabilities");
         }
@@ -296,7 +292,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver1, BTIntent);
         }
-    }
+    }*/
 
     public void btnEnableDisable_Discoverable(View view) {
         Log.d(TAG, "btnEnableDisable_Discoverable: Making device discoverable for 300 seconds");
@@ -307,7 +303,6 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
         IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         registerReceiver(mBroadcastReceiver2, intentFilter);
-
     }
 
     public void btnDiscover(View view) {
@@ -364,8 +359,8 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         mBluetoothAdapter.cancelDiscovery();
 
         Log.d(TAG, "onItemClick: You clicked a device.");
-        final String deviceName = mBTDevices.get(position).getName();
-        deviceAddress = mBTDevices.get(position).getAddress();
+        String deviceName = mBTDevices.get(position).getName();
+        String deviceAddress = mBTDevices.get(position).getAddress();
 
         Log.d(TAG, "onItemClick: deviceName = " + deviceName);
         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
@@ -380,20 +375,17 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
             mBTDevice = mBTDevices.get(position);
             mBluetoothConnection = new BluetoothConnectionService(BluetoothActivity.this);
             startConnection();
-
         }
-
     }
-        // Kutsutaan BluetoothConnectionServicen ConnectedThreadissa
-        public void startNextActivity(){
+    // Kutsutaan BluetoothConnectionServicen ConnectedThreadissa
+    public void startNextActivity(){
 
             Log.d(TAG, "startNextActivity ");
-
-                // Käynnistetään uusi activity
-                Log.d(TAG, "Start game ");
-                Intent intent = new Intent(BluetoothActivity.this, ShipSettingActivity.class);
-                startActivityForResult(intent, Finished_Activity);
-        }
+            // Käynnistetään uusi activity
+            Log.d(TAG, "Start game ");
+            Intent intent = new Intent(BluetoothActivity.this, ShipSettingActivity.class);
+            startActivityForResult(intent, Finished_Activity);
+    }
 
 
     @Override
@@ -413,6 +405,5 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
                 Log.d(TAG, "onResume .start() failed");
             }
         }
-
-        }
+    }
 }
