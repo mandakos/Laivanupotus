@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">Laivanupotus</string>
 
-    <string name="button_new">Be visible</string>
-    <string name="button_join">Find playmate</string>
+    <string name="button_new">Wait for opponent</string>
+    <string name="button_join">Search for opponent</string>
+    <string name="button_startgame">Start game</string>
+
     <string name="battleship">Battleship</string>
     <string name="cruiser">Cruiser</string>
     <string name="destroyer">Destroyer</string>
