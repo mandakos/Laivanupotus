@@ -1,10 +1,13 @@
 package ryhma3.laivanupotus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -13,6 +16,7 @@ import android.view.View;
 
 public class ShipView extends View implements Runnable {
 
+    static Context mContext;
     /*
     Taisteluruudukot ovat int-tyyppisiä 2-ulotteisia matriiseja. Näitä arvoja käytetään täyttämään matriisi.
     Matriisin avulla piirretään ruudukot ja niiden ruudut väritetään sen mukaan mitä arvoja matriiseissa on.
@@ -451,6 +455,9 @@ public class ShipView extends View implements Runnable {
                     targetingY = (int) ((event.getY() - marginHeight) / cellSideLength) - 1;
                     Log.d(TAG, targetingX + "," + targetingY);
                     invalidate();
+
+                    sendTargetToActivity(targetingX, targetingY);
+
                 } catch (ArrayIndexOutOfBoundsException ex) {
                     return true;
                 }
@@ -458,4 +465,18 @@ public class ShipView extends View implements Runnable {
         }
         return true;
     }
+
+    private static void sendTargetToActivity(int target1, int target2) {
+        Intent intent = new Intent("GridTargets");
+        // You can also include some extra data.
+        //intent.putExtra("Status", msg);
+        Bundle t1 = new Bundle();
+        t1.putInt("Target1", target1);
+        intent.putExtra("Target1", t1);
+        Bundle t2 = new Bundle();
+        t2.putInt("Target2", target2);
+        intent.putExtra("Target2", t2);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+    }
+
 }

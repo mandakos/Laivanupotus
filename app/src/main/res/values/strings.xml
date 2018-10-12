@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Laivanupotus</string>
 
-    <string name="button_new">Wait for opponent</string>
+    <string name="button_new">Start bluetooth</string>
     <string name="button_join">Search for opponent</string>
     <string name="button_startgame">Start game</string>
 

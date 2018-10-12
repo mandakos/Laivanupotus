@@ -45,7 +45,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     EditText etSend;
     ListView lvNewDevices;
     TextView incomingMessages;
-    TextView textList;
+    static TextView textList;
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
@@ -146,17 +146,17 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_BONDED");
                     mBTDevice = mDevice;
-                    textList.setText("Connected to " + mBTDevice.getName());
+                    //textList.setText("Connected to " + mBTDevice.getName());
                 }
                 //Paritus kÃ¤ynnissÃ¤
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_BONDING");
-                    textList.setText("Connecting to " + mBTDevice.getName());
+                    //textList.setText("Connecting to " + mBTDevice.getName());
                 }
                 //Paritus katkennut
                 if(mDevice.getBondState() == BluetoothDevice.BOND_NONE){
                     Log.d(TAG, "BroadcastReceiver4 : BOND_NONE");
-                    textList.setText("Connection failed");
+                    //textList.setText("Connection failed");
                 }
             }
         }
@@ -167,8 +167,9 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         @Override
         public void onReceive(Context context, Intent intent) {
             String text = intent.getStringExtra("MESSAGE");
-            messages.append(text + "\n");
-            incomingMessages.setText(messages);
+            /*messages.append(text + "\n");
+            incomingMessages.setText(messages);*/
+            incomingMessages.setText(text);
         }
     };
 
@@ -191,6 +192,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         //Button btnONOFF = findViewById(R.id.btnONOFF);
         btnEnableDisable_Discoverable = findViewById(R.id.btnDiscoverable_on_off);
         btnStartConnection = findViewById(R.id.btnStartConnection);
+        btnStartConnection.setEnabled(false);
 
         textList = findViewById(R.id.textList);
         lvNewDevices = findViewById(R.id.lvNewDevices);
@@ -203,6 +205,8 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
         messages = new StringBuilder();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("incomingMessage"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mMessageReceiver, new IntentFilter("Status"));
 
         //Kutsutaan kun paritus tapahtuu
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -297,12 +301,15 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
     public void btnEnableDisable_Discoverable(View view) {
         Log.d(TAG, "btnEnableDisable_Discoverable: Making device discoverable for 300 seconds");
 
+        textList.setText("Bluetooth visible");
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
         startActivity(discoverableIntent);
 
         IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         registerReceiver(mBroadcastReceiver2, intentFilter);
+
+        //textList.setText("Waiting for opponent...");
     }
 
     public void btnDiscover(View view) {
@@ -341,13 +348,15 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
     private void checkBTPermissions() {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
-            int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
-            permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
+            if(Build.VERSION.SDK_INT > 22) {
+                int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
+                permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
 
-            if(permissionCheck != 0){
-                this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001);
-            }else{
-                Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
+                if (permissionCheck != 0) {
+                    this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001);
+                } else {
+                    Log.d(TAG, "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
+                }
             }
 
         }
@@ -364,7 +373,7 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
 
         Log.d(TAG, "onItemClick: deviceName = " + deviceName);
         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
-        textList.setText("Chosen device:\n" + deviceName);
+        textList.setText("Chosen device:" + deviceName);
 
         //paritus
         //createBond()-metodi vaatii suuremman Android SDK version entÃ¤ JELLY_BEAN_MR2
@@ -406,4 +415,22 @@ public class BluetoothActivity extends AppCompatActivity implements AdapterView.
             }
         }
     }
+
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("Status");
+            Bundle b = intent.getBundleExtra("Connect");
+            Boolean state = b.getBoolean("Connect");
+
+            if(state == true){
+                btnStartConnection.setEnabled(true);
+            }
+            textList.setText(message);
+
+        }
+    };
+
 }

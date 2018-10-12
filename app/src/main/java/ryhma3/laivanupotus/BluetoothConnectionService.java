@@ -6,8 +6,11 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -24,7 +27,7 @@ public class BluetoothConnectionService {
     //private static final UUID UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private final BluetoothAdapter mBluetoothAdapter;
-    Context mContext;
+    static Context mContext;
 
     private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
@@ -38,6 +41,8 @@ public class BluetoothConnectionService {
         mContext = c;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         start();
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(
+                mMessageReceiver, new IntentFilter("GridTargets"));
     }
 
     /*
@@ -85,6 +90,7 @@ public class BluetoothConnectionService {
 
             }
 
+            sendMessageToActivity("You can now chat with " + socket.getRemoteDevice().getName(), true);
             Log.i(TAG, "END mAcceptThread");
         }
 
@@ -92,6 +98,8 @@ public class BluetoothConnectionService {
             Log.d(TAG, "cancel : Canceling AcceptThread");
             try{
                 mServerSocket.close();
+                sendMessageToActivity("Bluetooth connection closed", false);
+
             }catch(IOException e){
                 Log.e(TAG, "cancel: Close of AcceptThread ServerSocket failed. " + e.getMessage());
             }
@@ -169,6 +177,8 @@ public class BluetoothConnectionService {
             Log.d(TAG, "cancel : Closing Client Socket.");
             try{
                 mSocket.close();
+                sendMessageToActivity("Bluetooth connection closed", false);
+
             }catch(IOException e){
                 Log.e(TAG, "cancel: Close() of mSocket in ConnectThread failed. " + e.getMessage());
             }
@@ -226,6 +236,7 @@ public class BluetoothConnectionService {
                 if(mProgressDialog != null){
                     mProgressDialog.dismiss();
                 }
+                sendMessageToActivity("You can now chat with " + socket.getRemoteDevice().getName(), true);
 
                 // Kun bluetooth yhteys on tehty, käsketään BluetoothActivityssä avaamaan seuraava activity
                 //BluetoothActivity btActivity = BluetoothActivity.getInstance();
@@ -289,6 +300,8 @@ public class BluetoothConnectionService {
         public void cancel(){
             try{
                 mSocket.close();
+                sendMessageToActivity("Bluetooth connection closed", false);
+
             }catch(IOException e){
                 e.printStackTrace();
             }
@@ -316,6 +329,36 @@ public class BluetoothConnectionService {
         Log.d(TAG, "write: Write called");
         mConnectedThread.write(out);
     }
+
+    private static void sendMessageToActivity(String msg, Boolean bool) {
+        Intent intent = new Intent("Status");
+        // Lähetetään BluetoothActivigtylle dataa jotta voi vaihtaa tekstin UI:ssa
+        intent.putExtra("Status", msg);
+        Bundle b = new Bundle();
+        b.putBoolean("Connect", bool);
+        intent.putExtra("Connect", b);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+
+            Bundle t1 = intent.getBundleExtra("Target1");
+            Bundle t2 = intent.getBundleExtra("Target2");
+            int target1 = t1.getInt("Target1");
+            int target2 = t2.getInt("Target2");
+
+            if (mConnectedThread != null) {
+                Log.d("mMessageReceiver", target1 + "," + target2);
+                String status = String.valueOf(target1) +", "+ String.valueOf(target2);
+                byte[] ByteArray = status.getBytes();
+                mConnectedThread.write(ByteArray);
+            }
+
+        }
+    };
 
 
 }

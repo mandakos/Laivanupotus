@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/backgroundColorLight"
     android:orientation="vertical"
     tools:context=".BluetoothActivity">
 
@@ -19,15 +20,15 @@
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraintLayout"
-        android:layout_width="211dp"
+        android:layout_width="212dp"
         android:layout_height="294dp"
-        android:layout_marginBottom="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintVertical_bias="0.489">
 
         <!---<Button
             android:id="@+id/btnServer"
@@ -51,9 +52,8 @@
 
         <EditText
             android:id="@+id/editText"
-            android:layout_width="201dp"
+            android:layout_width="match_parent"
             android:layout_height="42dp"
-            android:layout_marginStart="4dp"
             android:layout_marginTop="144dp"
             android:ems="10"
             android:hint="Chat"
@@ -65,8 +65,8 @@
             android:id="@+id/btnFindUnpairedDevices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:onClick="btnDiscover"
             android:text="@string/button_join"
             app:layout_constraintBottom_toTopOf="@+id/btnDiscoverable_on_off"
@@ -89,9 +89,8 @@
 
         <Button
             android:id="@+id/btnSend"
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="38dp"
-            android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             android:text="SEND"
             app:layout_constraintStart_toStartOf="parent"
@@ -99,12 +98,15 @@
 
         <TextView
             android:id="@+id/incomingMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="33dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginStart="44dp"
+            android:layout_width="206dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="3dp"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:background="@android:color/white"
             android:gravity="left"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
             android:text="Incoming Messages"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -127,10 +129,10 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="343dp"
         android:layout_height="300dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/constraintLayout"
@@ -140,8 +142,8 @@
             android:id="@+id/textList"
             android:layout_width="274dp"
             android:layout_height="43dp"
-            android:layout_marginEnd="44dp"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="44dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -149,8 +151,8 @@
             android:id="@+id/lvNewDevices"
             android:layout_width="276dp"
             android:layout_height="179dp"
-            android:layout_marginEnd="44dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="44dp"
             android:headerDividersEnabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textList">
@@ -161,9 +163,9 @@
             android:id="@+id/btnStartConnection"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="44dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="44dp"
+            android:layout_marginBottom="8dp"
             android:text="@string/button_startgame"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
