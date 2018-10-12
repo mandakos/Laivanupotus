@@ -114,7 +114,7 @@ public class ShipView extends View implements Runnable {
         missPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         targetPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         hitPaint.setColor(Color.RED);
-        missPaint.setColor(Color.LTGRAY);
+        missPaint.setColor(Color.BLUE);
         targetPaint.setColor(Color.GREEN);
 
         // Legacy-versio ruudukon piirtämiseen tarvittavasta tilan laskennasta.
@@ -154,6 +154,20 @@ public class ShipView extends View implements Runnable {
         myGrid = new int[CELLS][CELLS];
         enemyGrid = new int[CELLS][CELLS];
 
+        //Mielivaltainen vihollislaivojen koordinaattien asettaminen demoamistarkoitusta varten
+
+        //Battleship
+        for(int i = 3; i < 8; i++){
+            enemyGrid[i][3] = SHIP;
+        }
+
+        //Cruiser
+        for(int i = 4; i < 7; i++){
+            enemyGrid[1][i] = SHIP;
+        }
+
+        //Destroyer
+        enemyGrid[5][6] = SHIP;
     }
 
     //Pelisäikeen turvallinen käynnistäminen
@@ -199,12 +213,17 @@ public class ShipView extends View implements Runnable {
             }
         }
         //vihollisen ruudukko
+        //HUOM! Luonnollisesti pelaaja ei saa tietää vihollislaivojen sijaintia etukäteen, joten niitä ei piirretä
         for(int i = 0; i < CELLS; i++) {
             float yPlacement = marginHeight + ((i + 1) * (cellSideLength));
             for (int j = 0; j < CELLS; j++) {
                 float xPlacement = (gridSideLength + marginWidth * 2) + (j + 1) * (cellSideLength);
-                if(j == targetingX && i == targetingY){
+                if(j == targetingX && i == targetingY) {
                     canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, targetPaint);
+                }else if(enemyGrid[j][i] == MISS) {
+                    canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, missPaint);
+                }else if(enemyGrid[j][i] == HIT){
+                    canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, hitPaint);
                 }else{
                     canvas.drawRect(xPlacement, yPlacement, xPlacement + cellSideLength, yPlacement + cellSideLength, gridPaint);
                 }
@@ -383,12 +402,14 @@ public class ShipView extends View implements Runnable {
     public boolean fire(){
         if(enemyGrid[targetingX][targetingY] == SHIP){
             enemyGrid[targetingX][targetingY] = HIT;
+            invalidate();
             return true;
         }else{
             if(enemyGrid[targetingX][targetingY] == NOSHIP){
                 enemyGrid[targetingX][targetingY] = MISS;
+                invalidate();
             }else if(enemyGrid[targetingX][targetingY] == MISS){
-                Log.d(TAG, "Player is trying to fire into a square that has already been upon and missed");
+                Log.d(TAG, "Player is trying to fire into a square that has already been fired upon and missed");
                 //TODO: Mekanismi hellävaraiselle muistutukselle että näin ei ehkä kannattaisi tehdä
             }
             return false;

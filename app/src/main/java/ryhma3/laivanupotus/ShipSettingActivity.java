@@ -78,9 +78,7 @@ public class ShipSettingActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "WAITING IMPLEMENTATION", Toast.LENGTH_SHORT).show();
-                //TODO: Ampumisen ohjelmalogiikka
-                // Tässäkin kannattaa varmaan kutsua Viewiin tehtävää fire()-metodia. Fire()-metodia tulisi puolestaan kutsua Viewin run()-metodissa oikeassa kohti
+                shipView.fire();
             }
         });
     }
